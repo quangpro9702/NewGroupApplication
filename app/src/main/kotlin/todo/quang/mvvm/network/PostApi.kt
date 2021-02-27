@@ -1,16 +1,12 @@
 package todo.quang.mvvm.network
 
-import io.reactivex.Observable
-import todo.quang.mvvm.model.Post
+import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
+import todo.quang.mvvm.network.model.AppInfoData
 
-/**
- * The interface which provides methods to get result of webservices
- */
 interface PostApi {
-    /**
-     * Get the list of the pots from the API
-     */
-    @GET("/posts")
-    fun getPosts(): Observable<List<Post>>
+    @GET("api")
+    suspend fun getGenre(@Query("id") id: String): Response<AppInfoData>
 }

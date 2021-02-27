@@ -1,7 +1,7 @@
 package todo.quang.mvvm.model
 
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 /**
  * Class which provides a model for post
@@ -12,10 +12,10 @@ import android.arch.persistence.room.PrimaryKey
  * @property body the content of the post
  */
 @Entity
-data class Post(
-        val userId: Int,
+data class AppInfo(
         @field:PrimaryKey
         val id: Int,
-        val title: String,
-        val body: String
+        val name: String,
+        val genre : String,
+        val type : Int
 )
