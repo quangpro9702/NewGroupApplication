@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "net.gahfy.mvvmposts"
+        applicationId "todo.quang.mvvm"
         minSdkVersion 15
         targetSdkVersion 28
         versionCode 1
