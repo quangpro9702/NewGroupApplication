@@ -2,10 +2,12 @@ package todo.quang.mvvm.model.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import todo.quang.mvvm.model.AppInfo
+import androidx.room.TypeConverters
+import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.model.AppInfoDao
 
-@Database(entities = [AppInfo::class], version = 1)
+@Database(entities = [AppInfoEntity::class], version = 1)
+@TypeConverters(DataConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun appInfoDao(): AppInfoDao
 

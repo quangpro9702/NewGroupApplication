@@ -6,5 +6,5 @@ import androidx.room.Insert
 @Dao
 interface AppInfoDao {
     @Insert
-    fun insertAll(vararg users: AppInfo)
+    fun insertAll(vararg users: AppInfoEntity)
 }

@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import todo.quang.mvvm.BuildConfig
 import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.utils.BASE_URL
 import java.util.concurrent.TimeUnit
@@ -19,15 +20,18 @@ import javax.inject.Singleton
 @Module
 @InstallIn(ApplicationComponent::class)
 object NetworkModule {
+
     @Provides
     @Singleton
     fun providesOkHttpClient(): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
+
+
         return OkHttpClient.Builder()
-                .connectTimeout(30L, TimeUnit.SECONDS)
-                .readTimeout(30L, TimeUnit.SECONDS)
+                .connectTimeout(6L, TimeUnit.SECONDS)
+                .readTimeout(6L, TimeUnit.SECONDS)
                 .addInterceptor(httpLoggingInterceptor)
                 .build()
     }

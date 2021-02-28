@@ -12,10 +12,11 @@ import androidx.room.PrimaryKey
  * @property body the content of the post
  */
 @Entity
-data class AppInfo(
+data class AppInfoEntity(
         @field:PrimaryKey
-        val id: Int,
-        val name: String,
-        val genre : String,
-        val type : Int
+        val id: Long = System.currentTimeMillis(),
+        val name: String = "",
+        val packageName: String = "",
+        val genre: String = "",
+        val genreType: Int?
 )
