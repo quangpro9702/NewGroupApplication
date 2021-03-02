@@ -24,7 +24,6 @@ class PostListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getAllApplication()
         setupUI()
         setupObserve()
     }
@@ -41,43 +40,13 @@ class PostListActivity : AppCompatActivity() {
     }
 
     private fun setupObserve() {
-        viewModel.genreLiveData.observe(this, {
+        viewModel.groupAppInfoDataItem.observe(this, {
             categoryAdapter.submitList(it)
         })
-    }
-
-    private fun getAllApplication() {
-        val packages = getInstalledApps(applicationContext)
-        viewModel.loadPosts()
     }
 
     private fun openApp(packageName: String) {
         val launchApp = packageManager.getLaunchIntentForPackage(packageName)
         startActivity(launchApp)
-    }
-
-    private fun getInstalledApps(ctx: Context): Set<PackageInfo> {
-        val packageManager: PackageManager = ctx.packageManager
-        val allInstalledPackages = packageManager.getInstalledPackages(PackageManager.GET_META_DATA)
-        val filteredPackages: MutableSet<PackageInfo> = HashSet()
-        val defaultActivityIcon = packageManager.defaultActivityIcon
-        for (each in allInstalledPackages) {
-            if (ctx.packageName == each.packageName) {
-                continue  // skip own app
-            }
-            try {
-                // add only apps with application icon
-                val intentOfStartActivity =
-                        packageManager.getLaunchIntentForPackage(each.packageName)
-                                ?: continue
-                val applicationIcon = packageManager.getActivityIcon(intentOfStartActivity)
-                if (defaultActivityIcon != applicationIcon) {
-                    filteredPackages.add(each)
-                }
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.i("MyTag", "Unknown package name " + each.packageName)
-            }
-        }
-        return filteredPackages
     }
 }

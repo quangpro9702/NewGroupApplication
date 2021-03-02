@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.database.AppDatabase
 import javax.inject.Singleton
 
@@ -20,4 +21,9 @@ object DataBaseModule {
                 .fallbackToDestructiveMigration()
                 .build()
     }
+
+
+    @Singleton
+    @Provides
+    fun provideAppInfoDao(database: AppDatabase): AppInfoDao = database.appInfoDao()
 }

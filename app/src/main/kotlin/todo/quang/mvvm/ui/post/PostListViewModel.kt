@@ -1,54 +1,102 @@
 package todo.quang.mvvm.ui.post
 
 import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import todo.quang.mvvm.base.switchMapLiveData
+import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
+import todo.quang.mvvm.utils.FIRST_LOGIN
+import todo.quang.mvvm.utils.SHARED_NAME
 import todo.quang.mvvm.utils.extension.postValue
 import kotlin.coroutines.CoroutineContext
 
-class PostListViewModel @ViewModelInject constructor(application: Application, val postApi: PostApi) : AndroidViewModel(application) {
+
+class PostListViewModel @ViewModelInject constructor(
+        application: Application, private val appInfoDao: AppInfoDao, private val postApi: PostApi) : AndroidViewModel(application) {
     private val context = getApplication<Application>().applicationContext
 
-    val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
+    private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
+
+    private val doneGetData: LiveData<Boolean> = liveData {
+        if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+            loadPosts()
+        } else {
+            emit(true)
+        }
+    }
+
+    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData {
+        val list: ArrayList<AppInfoDataItem> = arrayListOf()
+        getInstalledApps().forEach {
+            appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
+                list.add(AppInfoDataItem(this, it))
+            } ?: apply {
+                val app = postApi.getGenre(it.packageName)
+                app.body()?.data?.takeIf { data ->
+                    data.size > 1
+                }?.let { data ->
+                    /*Truong hop khong tim thay trong database*/
+                    val appInsert = AppInfoEntity(packageName = it.packageName,
+                            genreType = null, genreName = data[1])
+                    appInfoDao.insertAll(appInsert)
+                    list.add(AppInfoDataItem(appInsert, it))
+                } ?: apply {
+                    val appInsert = AppInfoEntity(packageName = it.packageName,
+                            genreType = null, genreName = "")
+                    appInfoDao.insertAll(appInsert)
+                    list.add(AppInfoDataItem(appInsert, it))
+                }
+            }
+        }
+        emit(list)
+    }
+
+    val groupAppInfoDataItem: LiveData<List<List<AppInfoDataItem>>> = mapPackageInfoFromDataBase.switchMapLiveData { it ->
+        it.groupBy {
+            it.appInfoEntity.genreName
+        }.apply {
+            this.map { it.value }.apply {
+                emit(this)
+            }
+        }
+    }
+
+    private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
         ExceptionBus.instance.bindException(throwable)
     }
 
-    val genreLiveData: LiveData<List<List<AppInfoDataItem>>> = MutableLiveData()
-
     fun loadPosts() {
         viewModelScope.launch(Dispatchers.IO + handler) {
-            val list: ArrayList<AppInfoDataItem> = arrayListOf()
+            val list: ArrayList<AppInfoEntity> = arrayListOf()
             getInstalledApps().forEach {
                 postApi.getGenre(it.packageName).apply {
                     this.body()?.data?.takeIf { data ->
                         data.size > 1
                     }?.let { data ->
-                        list.add(AppInfoDataItem(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genreName = data[1]), it))
+                        list.add(AppInfoEntity(packageName = it.packageName,
+                                genreType = null, genreName = data[1]))
                     } ?: apply {
-                        list.add(AppInfoDataItem(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genreName = ""), it))
+                        list.add(AppInfoEntity(packageName = it.packageName,
+                                genreType = null, genreName = ""))
                     }
                 }
             }.apply {
-                list.groupBy {
-                    it.appInfoEntity.genreName
-                }.apply {
-                    this.map { it.value }.apply {
-                        genreLiveData.postValue(this)
-                    }
-                }
+                appInfoDao.insertAll(*list.toTypedArray())
+                sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
+                doneGetData.postValue(true)
             }
         }
     }
