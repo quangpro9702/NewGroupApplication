@@ -11,6 +11,8 @@ import kotlinx.android.synthetic.main.item_category.view.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.BaseAdapter
 import todo.quang.mvvm.ui.post.PostListViewModel
+import todo.quang.mvvm.utils.extension.isGone
+import todo.quang.mvvm.utils.extension.isVisible
 
 class CategoryAdapter(
         private val packageManager: PackageManager,
@@ -41,7 +43,7 @@ class CategoryAdapter(
         view.imgFirst.setOnClickListener {
             openApp.invoke(item[0].packageInfo.packageName)
         }
-        view.tvTitle.text = itemApp.appInfoEntity.genre
+        view.tvTitle.text = itemApp.appInfoEntity.genreName
         if (item.size > 1) {
             itemApp = item[1]
             Glide
@@ -64,7 +66,9 @@ class CategoryAdapter(
                 openApp.invoke(item[2].packageInfo.packageName)
             }
         }
-        if (item.size > 3) {
+        if (item.size == 4) {
+            view.imgFourth.isVisible()
+            view.layoutGroup.isGone()
             itemApp = item[3]
             Glide
                     .with(view)
@@ -73,6 +77,40 @@ class CategoryAdapter(
                     .into(view.imgFourth)
             view.imgFourth.setOnClickListener {
                 openApp.invoke(item[3].packageInfo.packageName)
+            }
+        }
+        if (item.size > 4) {
+            view.imgFourth.isGone()
+            view.layoutGroup.isVisible()
+            itemApp = item[3]
+            Glide
+                    .with(view)
+                    .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                    .centerInside()
+                    .into(view.imgFirstt)
+            if (item.size > 5) {
+                itemApp = item[4]
+                Glide
+                        .with(view)
+                        .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                        .centerInside()
+                        .into(view.imgSecondd)
+            }
+            if (item.size > 6) {
+                itemApp = item[5]
+                Glide
+                        .with(view)
+                        .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                        .centerInside()
+                        .into(view.imgThirdd)
+            }
+            if (item.size > 7) {
+                itemApp = item[6]
+                Glide
+                        .with(view)
+                        .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                        .centerInside()
+                        .into(view.imgFourthh)
             }
         }
     }

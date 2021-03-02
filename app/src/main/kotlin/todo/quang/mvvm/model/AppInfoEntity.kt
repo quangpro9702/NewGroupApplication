@@ -16,7 +16,7 @@ data class AppInfoEntity(
         @field:PrimaryKey
         val id: Long = System.currentTimeMillis(),
         val name: String = "",
-        val packageName: String = "",
-        val genre: String = "",
+        val packageName: String,
+        val genreName: String = "",
         val genreType: Int?
 )

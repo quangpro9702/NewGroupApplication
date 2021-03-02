@@ -35,15 +35,15 @@ class PostListViewModel @ViewModelInject constructor(application: Application, v
                         data.size > 1
                     }?.let { data ->
                         list.add(AppInfoDataItem(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genre = data[1]), it))
+                                genreType = null, genreName = data[1]), it))
                     } ?: apply {
                         list.add(AppInfoDataItem(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genre = ""), it))
+                                genreType = null, genreName = ""), it))
                     }
                 }
             }.apply {
                 list.groupBy {
-                    it.appInfoEntity.genre
+                    it.appInfoEntity.genreName
                 }.apply {
                     this.map { it.value }.apply {
                         genreLiveData.postValue(this)
