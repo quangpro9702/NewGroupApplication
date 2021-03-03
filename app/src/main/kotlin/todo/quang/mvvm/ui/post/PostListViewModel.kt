@@ -62,6 +62,11 @@ class PostListViewModel @ViewModelInject constructor(
             }
         }
         emit(list)
+        /*.filter {
+            val list = listOf("ADVENTURE", "ARCADE", "BOARD", "CARD", "CASINO", "CASUAL", "EDUCATIONAL", "MUSIC", "PUZZLE", "RACING",
+                    "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
+            list0fit.value.get(0).appInfoEntity.genreName
+        }*/
     }
 
     val groupAppInfoDataItem: LiveData<List<List<AppInfoDataItem>>> = mapPackageInfoFromDataBase.switchMapLiveData { it ->
@@ -78,7 +83,7 @@ class PostListViewModel @ViewModelInject constructor(
         ExceptionBus.instance.bindException(throwable)
     }
 
-    fun loadPosts() {
+    private fun loadPosts() {
         viewModelScope.launch(Dispatchers.IO + handler) {
             val list: ArrayList<AppInfoEntity> = arrayListOf()
             getInstalledApps().forEach {
