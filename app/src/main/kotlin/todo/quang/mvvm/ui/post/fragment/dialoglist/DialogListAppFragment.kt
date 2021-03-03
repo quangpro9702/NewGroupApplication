@@ -7,11 +7,16 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.GridLayoutManager
 import todo.quang.mvvm.R
+import todo.quang.mvvm.databinding.FragmentDialogListAppBinding
 import todo.quang.mvvm.ui.post.PostListViewModel
+import todo.quang.mvvm.ui.post.adapter.ListAppAdapter
 
 class DialogListAppFragment : DialogFragment() {
     private val viewModelShare: PostListViewModel by activityViewModels()
+    private lateinit var binding: FragmentDialogListAppBinding
+    private lateinit var listAppAdapter: ListAppAdapter
 
     companion object {
         private const val KEY_POSITION = "KEY_POSITION"
@@ -23,7 +28,6 @@ class DialogListAppFragment : DialogFragment() {
             fragment.arguments = args
             return fragment
         }
-
     }
 
     override fun onCreateView(
@@ -36,8 +40,9 @@ class DialogListAppFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding = FragmentDialogListAppBinding.bind(requireView())
         setupView()
-        setupClickListeners(view)
+        setupObserve()
     }
 
     override fun onStart() {
@@ -49,8 +54,27 @@ class DialogListAppFragment : DialogFragment() {
     }
 
     private fun setupView() {
+        binding.recyclerList.setHasFixedSize(true)
+
+        binding.recyclerList.layoutManager = GridLayoutManager(requireActivity(), 4)
+
+        listAppAdapter = ListAppAdapter(requireActivity().packageManager) {
+            openApp(it)
+        }.apply {
+            binding.recyclerList.adapter = this
+        }
     }
 
-    private fun setupClickListeners(view: View) {
+    private fun setupObserve() {
+        viewModelShare.groupAppInfoDataItem.observe(viewLifecycleOwner, { it ->
+            it.getOrNull(arguments?.getInt(KEY_POSITION) ?: 0)?.let {
+                listAppAdapter.submitList(it)
+            }
+        })
+    }
+
+    private fun openApp(packageName: String) {
+        val launchApp = requireActivity().packageManager.getLaunchIntentForPackage(packageName)
+        startActivity(launchApp)
     }
 }

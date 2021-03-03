@@ -1,12 +1,10 @@
 package todo.quang.mvvm.ui.post.adapter
 
 import android.content.pm.PackageManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_category.view.*
@@ -19,7 +17,8 @@ import todo.quang.mvvm.utils.extension.visibleOrGone
 
 class CategoryAdapter(
         private val packageManager: PackageManager,
-        private val openApp: (namePackage: String) -> Unit
+        private val openApp: (namePackage: String) -> Unit,
+        private val showListApp: (position: Int) -> Unit
 ) : BaseAdapter<List<PostListViewModel.AppInfoDataItem>>(object : DiffUtil.ItemCallback<List<PostListViewModel.AppInfoDataItem>>() {
     override fun areItemsTheSame(oldItem: List<PostListViewModel.AppInfoDataItem>, newItem: List<PostListViewModel.AppInfoDataItem>): Boolean {
         return false
@@ -47,9 +46,8 @@ class CategoryAdapter(
             openApp.invoke(item[0].packageInfo.packageName)
         }
         view.tvTitle.text = itemApp.appInfoEntity.genreName
-//        view.tvTitle.text = itemApp.packageInfo.applicationInfo.loadLabel(packageManager).toString()
 
-        view.imgSecond.isVisible = item.size > 1
+        view.imgSecond.visibleOrGone(item.size > 1)
         if (item.size > 1) {
             itemApp = item[1]
             Glide
@@ -61,7 +59,7 @@ class CategoryAdapter(
                 openApp.invoke(item[1].packageInfo.packageName)
             }
         }
-        view.imgThird.isVisible = item.size > 2
+        view.imgThird.visibleOrGone(item.size > 2)
         if (item.size > 2) {
             itemApp = item[2]
             Glide
@@ -73,11 +71,9 @@ class CategoryAdapter(
                 openApp.invoke(item[2].packageInfo.packageName)
             }
         }
-        view.imgFourth.isGone()
-        view.layoutGroup.isGone()
+        view.layoutGroup.visibleOrGone(item.size > 4)
+        view.imgFourth.visibleOrGone(item.size == 4)
         if (item.size == 4) {
-            view.imgFourth.isVisible()
-            view.layoutGroup.isGone()
             itemApp = item[3]
             Glide
                     .with(view)
@@ -87,10 +83,11 @@ class CategoryAdapter(
             view.imgFourth.setOnClickListener {
                 openApp.invoke(item[3].packageInfo.packageName)
             }
-        }
-        if (item.size > 4) {
-            view.imgFourth.isGone()
-            view.layoutGroup.isVisible()
+        } else if (item.size > 4) {
+            view.layoutGroup.setOnClickListener {
+                showListApp.invoke(position)
+            }
+
             itemApp = item[3]
             Glide
                     .with(view)
