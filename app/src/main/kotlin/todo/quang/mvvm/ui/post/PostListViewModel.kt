@@ -55,7 +55,7 @@ class PostListViewModel @ViewModelInject constructor(
                     list.add(AppInfoDataItem(appInsert, it))
                 } ?: apply {
                     val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = "")
+                            genreType = null, genreName = "Other")
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -68,7 +68,7 @@ class PostListViewModel @ViewModelInject constructor(
         it.groupBy {
             it.appInfoEntity.genreName
         }.apply {
-            this.map { it.value }.apply {
+            this.map { it.value }.sortedBy { it.getOrNull(0)?.appInfoEntity?.genreName }.apply {
                 emit(this)
             }
         }
@@ -90,7 +90,7 @@ class PostListViewModel @ViewModelInject constructor(
                                 genreType = null, genreName = data[1]))
                     } ?: apply {
                         list.add(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genreName = ""))
+                                genreType = null, genreName = "Other"))
                     }
                 }
             }.apply {

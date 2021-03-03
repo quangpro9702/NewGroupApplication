@@ -1,52 +1,60 @@
 package todo.quang.mvvm.ui.post
 
-import android.content.Context
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.snackbar.Snackbar
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.activity_post_list.*
 import todo.quang.mvvm.R
+import todo.quang.mvvm.base.BottomAppBarCutCornersTopEdge
 import todo.quang.mvvm.databinding.ActivityPostListBinding
-import todo.quang.mvvm.ui.post.adapter.CategoryAdapter
+import todo.quang.mvvm.ui.post.fragment.applist.AppListFragment
+
+private const val NUM_PAGES = 2
 
 @AndroidEntryPoint
-class PostListActivity : AppCompatActivity() {
+class PostListActivity : FragmentActivity() {
+
     private lateinit var binding: ActivityPostListBinding
-    private var errorSnackbar: Snackbar? = null
+
     private val viewModel: PostListViewModel by viewModels()
-    private lateinit var categoryAdapter: CategoryAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupUI()
-        setupObserve()
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_post_list)
+        setContentView(binding.root)
+
+        binding.pager.adapter = ScreenSlidePagerAdapter(this)
+
+        val topEdge = BottomAppBarCutCornersTopEdge(
+                binding.bottomAppBar.fabCradleMargin,
+                binding.bottomAppBar.fabCradleRoundedCornerRadius,
+                binding.bottomAppBar.cradleVerticalOffset
+        )
+        val background = bottomAppBar.background as MaterialShapeDrawable
+        background.shapeAppearanceModel = background.shapeAppearanceModel.toBuilder().setTopEdge(topEdge).build()
     }
 
-    private fun setupUI() {
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_post_list)
-        binding.postList.setHasFixedSize(true)
-        binding.postList.layoutManager = GridLayoutManager(this, 2)
-        categoryAdapter = CategoryAdapter(packageManager) {
-            openApp(it)
-        }.apply {
-            binding.postList.adapter = this
+    override fun onBackPressed() {
+        if (binding.pager.currentItem == 0) {
+            super.onBackPressed()
+        } else {
+            binding.pager.currentItem = binding.pager.currentItem - 1
         }
     }
 
-    private fun setupObserve() {
-        viewModel.groupAppInfoDataItem.observe(this, {
-            categoryAdapter.submitList(it)
-        })
-    }
+    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
+        override fun getItemCount(): Int = NUM_PAGES
 
-    private fun openApp(packageName: String) {
-        val launchApp = packageManager.getLaunchIntentForPackage(packageName)
-        startActivity(launchApp)
+        override fun createFragment(position: Int): Fragment = when (position) {
+            0 -> AppListFragment.newInstance()
+            1 -> AppListFragment.newInstance()
+            else -> AppListFragment.newInstance()
+        }
     }
 }
