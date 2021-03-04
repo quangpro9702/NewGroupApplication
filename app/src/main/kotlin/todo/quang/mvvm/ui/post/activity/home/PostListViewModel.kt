@@ -32,6 +32,9 @@ class PostListViewModel @ViewModelInject constructor(
 
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
 
+    private val genresGame = listOf("ADVENTURE", "ARCADE", "BOARD", "CARD", "CASINO", "CASUAL", "EDUCATIONAL", "MUSIC", "PUZZLE", "RACING",
+            "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
+
     private val doneGetData: LiveData<Boolean> = liveData {
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
             loadPosts()
@@ -50,12 +53,12 @@ class PostListViewModel @ViewModelInject constructor(
                 app.body()?.data?.takeIf { data ->
                     data.size > 1
                 }?.let { data ->
-                    /*Truong hop khong tim thay trong database*/
                     val appInsert = AppInfoEntity(packageName = it.packageName,
                             genreType = null, genreName = data[1])
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 } ?: apply {
+                    /*Truong hop khong tim thay trong database*/
                     val appInsert = AppInfoEntity(packageName = it.packageName,
                             genreType = null, genreName = "Other")
                     appInfoDao.insertAll(appInsert)
@@ -67,31 +70,34 @@ class PostListViewModel @ViewModelInject constructor(
     }
 
     private val listGameFilter: LiveData<List<AppInfoDataItem>> = mapPackageInfoFromDataBase.switchMapLiveDataEmit { it ->
-        val list = listOf("ADVENTURE", "ARCADE", "BOARD", "CARD", "CASINO", "CASUAL", "EDUCATIONAL", "MUSIC", "PUZZLE", "RACING",
-                "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            list.contains(it.appInfoEntity.genreName.toUpperCase())
+            genresGame.contains(it.appInfoEntity.genreName.toUpperCase())
         }
     }
 
     private val listAppFilter: LiveData<List<AppInfoDataItem>> = mapPackageInfoFromDataBase.switchMapLiveDataEmit { it ->
-        val list = listOf("ADVENTURE", "ARCADE", "BOARD", "CARD", "CASINO", "CASUAL", "EDUCATIONAL", "MUSIC", "PUZZLE", "RACING",
-                "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            !list.contains(it.appInfoEntity.genreName.toUpperCase())
+            !genresGame.contains(it.appInfoEntity.genreName.toUpperCase())
         }
     }
 
     val groupAppInfoDataItem: LiveData<List<List<AppInfoDataItem>>> = listAppFilter.switchMapLiveData { it ->
-        it.groupBy {
+        val listApp: MutableList<List<AppInfoDataItem>> = mutableListOf()
+        it.apply {
+            //List recent
+            listApp.add(this.sortedByDescending { it.appInfoEntity.timeRecent }.take(4))
+            //List top used
+            listApp.add(this.sortedByDescending { it.appInfoEntity.sumClick }.take(4))
+        }.groupBy {
             it.appInfoEntity.genreName
         }.apply {
             this.map { it.value }.sortedBy { it.getOrNull(0)?.appInfoEntity?.genreName }.apply {
-                emit(this)
+                listApp.addAll(this)
+                emit(listApp)
             }
         }
     }
@@ -105,13 +111,6 @@ class PostListViewModel @ViewModelInject constructor(
             }
         }
     }
-    
-    val mergeListAppDataItem : LiveData<List<AppInfoDataItem>> = mapPackageInfoFromDataBase.switchMapLiveDataEmit { it ->
-        it.sortedBy {
-            it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
-        }
-    }
-
 
     private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
         ExceptionBus.instance.bindException(throwable)

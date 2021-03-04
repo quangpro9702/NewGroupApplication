@@ -47,11 +47,6 @@ class PostListActivity : FragmentActivity() {
 
     private fun setOnClickListener() {
         binding.btnSearch.setOnClickListener {
-            /* supportFragmentManager
-                     .beginTransaction()
-                     .replace(R.id.nav_host_fragment, SearchListActivity.newInstance())
-                     .addToBackStack(null)
-                     .commit()*/
             val intent = Intent(this, SearchListActivity::class.java)
             startActivity(intent)
         }

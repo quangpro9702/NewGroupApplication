@@ -25,6 +25,12 @@ android {
                 arg("room.schemaLocation", "$projectDir/schemas".toString())
             }
         }
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation":
+                                      "$projectDir/schemas".toString()]
+            }
+        }
 
     }
     buildTypes {
@@ -138,5 +144,8 @@ dependencies {
     implementation "com.google.android.material:material:$material_version"
 
     implementation 'com.l4digital.fastscroll:fastscroll:2.0.1'
+
+    def auto_dp_version = '1.0.6'
+    implementation "com.intuit.sdp:sdp-android:$auto_dp_version"
 }
 

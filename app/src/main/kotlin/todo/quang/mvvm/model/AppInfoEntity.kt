@@ -13,10 +13,12 @@ import androidx.room.PrimaryKey
  */
 @Entity
 data class AppInfoEntity(
-        @field:PrimaryKey
-        val id: Long = System.currentTimeMillis(),
-        val name: String = "",
-        val packageName: String,
-        val genreName: String = "",
-        val genreType: Int?
+        @PrimaryKey
+        var id: Long = System.currentTimeMillis(),
+        var name: String = "",
+        var packageName: String,
+        var genreName: String = "",
+        var genreType: Int?,
+        var timeRecent: Long = 0,
+        var sumClick: Long = 0
 )
