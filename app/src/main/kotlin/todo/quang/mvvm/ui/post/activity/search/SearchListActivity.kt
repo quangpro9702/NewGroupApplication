@@ -2,6 +2,7 @@ package todo.quang.mvvm.ui.post.activity.search
 
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,10 +31,14 @@ class SearchListActivity : FragmentActivity() {
     }
 
     private fun setupView() {
-        searchAdapter = SearchListAdapter(this.packageManager) {
-            openApp(it)
+        searchAdapter = SearchListAdapter(this.packageManager) { packageName, app ->
+            viewModel.updateAppChangeRecentInfo(app)
+            openApp(packageName)
         }.apply {
             binding.recyclerFast.adapter = this
+        }
+        binding.tvTextLayout.editText?.doOnTextChanged { inputText, _, _, _ ->
+            viewModel.searchApp(inputText.toString())
         }
     }
 

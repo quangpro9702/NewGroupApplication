@@ -9,12 +9,12 @@ import com.l4digital.fastscroll.FastScroller
 import kotlinx.android.synthetic.main.item_app_search.view.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.BaseAdapter
-import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
+import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.ui.post.activity.search.SearchListViewModel
 import todo.quang.mvvm.utils.extension.inflate
 
 class SearchListAdapter(private val packageManager: PackageManager,
-                        private val openApp: (namePackage: String) -> Unit) : FastScroller.SectionIndexer,
+                        private val openApp: (namePackage: String, app: AppInfoEntity) -> Unit) : FastScroller.SectionIndexer,
         BaseAdapter<SearchListViewModel.AppInfoDataItem>(object : DiffUtil.ItemCallback<SearchListViewModel.AppInfoDataItem>() {
             override fun areItemsTheSame(oldItem: SearchListViewModel.AppInfoDataItem, newItem: SearchListViewModel.AppInfoDataItem): Boolean {
                 return false
@@ -39,7 +39,7 @@ class SearchListAdapter(private val packageManager: PackageManager,
                 .into(view.imgIcon)
         view.tvName.text = item.packageInfo.applicationInfo.loadLabel(packageManager).toString()
         view.rootView.setOnClickListener {
-            openApp.invoke(item.packageInfo.packageName)
+            openApp.invoke(item.packageInfo.packageName, item.appInfoEntity)
         }
     }
 

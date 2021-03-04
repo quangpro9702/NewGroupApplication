@@ -56,6 +56,7 @@ class DialogListAppFragment : DialogFragment() {
     }
 
     private fun setupView() {
+
         binding.recyclerList.setHasFixedSize(true)
 
         binding.recyclerList.layoutManager = GridLayoutManager(requireActivity(), 4)
@@ -70,6 +71,7 @@ class DialogListAppFragment : DialogFragment() {
     private fun setupObserve() {
         viewModelShare.groupAppInfoDataItem.observe(viewLifecycleOwner, { it ->
             it.getOrNull(arguments?.getInt(KEY_POSITION) ?: 0)?.let {
+                binding.tvTitle.text = it[0].appInfoEntity.genreName
                 listAppAdapter.submitList(it)
             }
         })

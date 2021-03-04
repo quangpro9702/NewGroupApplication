@@ -5,4 +5,5 @@
     <string name="post_error">An error occurred while loading the posts</string>
     <string name="content_description_search">Search</string>
     <string name="content_description_more">More</string>
+    <string name="hint_search_app">Search Name</string>
 </resources>
