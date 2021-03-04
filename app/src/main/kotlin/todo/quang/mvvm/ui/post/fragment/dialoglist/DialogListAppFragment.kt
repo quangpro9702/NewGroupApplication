@@ -8,11 +8,13 @@ import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.FragmentDialogListAppBinding
-import todo.quang.mvvm.ui.post.PostListViewModel
+import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.adapter.ListAppAdapter
 
+@AndroidEntryPoint
 class DialogListAppFragment : DialogFragment() {
     private val viewModelShare: PostListViewModel by activityViewModels()
     private lateinit var binding: FragmentDialogListAppBinding

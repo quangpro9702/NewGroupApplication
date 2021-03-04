@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import dagger.hilt.android.AndroidEntryPoint
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.FragmentAppListBinding
-import todo.quang.mvvm.ui.post.PostListViewModel
+import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.adapter.CategoryAdapter
 import todo.quang.mvvm.ui.post.fragment.dialoglist.DialogListAppFragment
 
+@AndroidEntryPoint
 class AppListFragment : Fragment() {
     private val viewModelShare: PostListViewModel by activityViewModels()
 

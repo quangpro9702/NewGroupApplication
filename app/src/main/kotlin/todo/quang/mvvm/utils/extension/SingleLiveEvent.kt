@@ -1,8 +1,5 @@
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.Observer
 import androidx.annotation.MainThread
-import android.util.Log
+import androidx.lifecycle.MediatorLiveData
 import java.util.concurrent.atomic.AtomicBoolean
 
 class SingleLiveEvent<T> : MediatorLiveData<T>() {
@@ -13,19 +10,19 @@ class SingleLiveEvent<T> : MediatorLiveData<T>() {
 
     private val pending = AtomicBoolean(false)
 
- /*   @MainThread
-    override fun observe(owner: LifecycleOwner, observer: Observer<T>) {
-        if (hasActiveObservers()) {
-            Log.w(TAG, "Multiple observers registered but only one will be notified of changes.")
-        }
-        // Observe the internal MutableLiveData
-        super.observe(owner, { t ->
-            if (pending.compareAndSet(true, false)) {
-                observer.onChanged(t)
-            }
-        })
-    }
-*/
+    /*   @MainThread
+       override fun observe(owner: LifecycleOwner, observer: Observer<T>) {
+           if (hasActiveObservers()) {
+               Log.w(TAG, "Multiple observers registered but only one will be notified of changes.")
+           }
+           // Observe the internal MutableLiveData
+           super.observe(owner, { t ->
+               if (pending.compareAndSet(true, false)) {
+                   observer.onChanged(t)
+               }
+           })
+       }
+   */
     @MainThread
     override fun setValue(t: T?) {
         pending.set(true)

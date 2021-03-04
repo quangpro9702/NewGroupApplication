@@ -8,7 +8,7 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_app.view.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.BaseAdapter
-import todo.quang.mvvm.ui.post.PostListViewModel
+import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.utils.extension.inflate
 
 class ListAppAdapter(private val packageManager: PackageManager,

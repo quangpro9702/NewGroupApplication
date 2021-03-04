@@ -7,25 +7,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/pager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+        <FrameLayout
+            android:id="@+id/nav_host_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <com.google.android.material.bottomappbar.BottomAppBar
             android:id="@+id/bottomAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:hideOnScroll="true"
             android:layout_gravity="bottom"
+            app:hideOnScroll="true"
             app:menu="@menu/bottom_app_bar"
             app:navigationIcon="@drawable/ic_menu" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnSearch"
+            style="@style/Widget.App.FloatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_anchor="@id/bottomAppBar"
-            style="@style/Widget.App.FloatingActionButton"
             app:srcCompat="@drawable/ic_add"
             tools:ignore="VectorDrawableCompat" />
 

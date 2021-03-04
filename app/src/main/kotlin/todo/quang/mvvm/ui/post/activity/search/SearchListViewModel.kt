@@ -1,4 +1,4 @@
-package todo.quang.mvvm.ui.post
+package todo.quang.mvvm.ui.post.activity.search
 
 import android.app.Application
 import android.content.Context
@@ -15,16 +15,17 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import todo.quang.mvvm.base.switchMapLiveData
+import todo.quang.mvvm.base.switchMapLiveDataEmit
 import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
+import todo.quang.mvvm.ui.post.ExceptionBus
 import todo.quang.mvvm.utils.FIRST_LOGIN
 import todo.quang.mvvm.utils.SHARED_NAME
 import todo.quang.mvvm.utils.extension.postValue
 import kotlin.coroutines.CoroutineContext
 
-
-class PostListViewModel @ViewModelInject constructor(
+class SearchListViewModel  @ViewModelInject constructor(
         application: Application, private val appInfoDao: AppInfoDao, private val postApi: PostApi) : AndroidViewModel(application) {
     private val context = getApplication<Application>().applicationContext
 
@@ -62,20 +63,11 @@ class PostListViewModel @ViewModelInject constructor(
             }
         }
         emit(list)
-        /*.filter {
-            val list = listOf("ADVENTURE", "ARCADE", "BOARD", "CARD", "CASINO", "CASUAL", "EDUCATIONAL", "MUSIC", "PUZZLE", "RACING",
-                    "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
-            list0fit.value.get(0).appInfoEntity.genreName
-        }*/
     }
 
-    val groupAppInfoDataItem: LiveData<List<List<AppInfoDataItem>>> = mapPackageInfoFromDataBase.switchMapLiveData { it ->
-        it.groupBy {
-            it.appInfoEntity.genreName
-        }.apply {
-            this.map { it.value }.sortedBy { it.getOrNull(0)?.appInfoEntity?.genreName }.apply {
-                emit(this)
-            }
+    val mergeListAppDataItem : LiveData<List<AppInfoDataItem>> = mapPackageInfoFromDataBase.switchMapLiveDataEmit { it ->
+        it.sortedBy {
+            it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }
     }
 
