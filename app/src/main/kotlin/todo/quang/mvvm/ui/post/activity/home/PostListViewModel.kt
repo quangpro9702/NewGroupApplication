@@ -22,6 +22,7 @@ import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
 import todo.quang.mvvm.utils.FIRST_LOGIN
 import todo.quang.mvvm.utils.SHARED_NAME
+import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.extension.postValue
 import kotlin.coroutines.CoroutineContext
 
@@ -31,6 +32,10 @@ class PostListViewModel @ViewModelInject constructor(
     private val context = getApplication<Application>().applicationContext
 
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
+
+    private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
+        ExceptionBus.instance.bindException(throwable)
+    }
 
     private val genresGame = listOf("ADVENTURE", "ARCADE", "BOARD", "CARD", "CASINO", "CASUAL", "EDUCATIONAL", "MUSIC", "PUZZLE", "RACING",
             "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
@@ -43,26 +48,28 @@ class PostListViewModel @ViewModelInject constructor(
         }
     }
 
-    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData {
+    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
         getInstalledApps().forEach {
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
                 list.add(AppInfoDataItem(this, it))
             } ?: apply {
-                val app = postApi.getGenre(it.packageName)
-                app.body()?.data?.takeIf { data ->
-                    data.size > 1
-                }?.let { data ->
-                    val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = data[1])
-                    appInfoDao.insertAll(appInsert)
-                    list.add(AppInfoDataItem(appInsert, it))
-                } ?: apply {
-                    /*Truong hop khong tim thay trong database*/
-                    val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = "Other")
-                    appInfoDao.insertAll(appInsert)
-                    list.add(AppInfoDataItem(appInsert, it))
+                kotlin.runCatching {
+                    val app = postApi.getGenre(it.packageName) ?: throw KvException(0, "Không tìm thấy Privileges")
+                    app.body()?.data?.takeIf { data ->
+                        data.size > 1
+                    }?.let { data ->
+                        val appInsert = AppInfoEntity(packageName = it.packageName,
+                                genreType = null, genreName = data[1])
+                        appInfoDao.insertAll(appInsert)
+                        list.add(AppInfoDataItem(appInsert, it))
+                    } ?: apply {
+                        /*Truong hop khong tim thay trong database*/
+                        val appInsert = AppInfoEntity(packageName = it.packageName,
+                                genreType = null, genreName = "Other")
+                        appInfoDao.insertAll(appInsert)
+                        list.add(AppInfoDataItem(appInsert, it))
+                    }
                 }
             }
         }
@@ -112,29 +119,27 @@ class PostListViewModel @ViewModelInject constructor(
         }
     }
 
-    private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
-        ExceptionBus.instance.bindException(throwable)
-    }
-
     private fun loadPosts() {
         viewModelScope.launch(Dispatchers.IO + handler) {
             val list: ArrayList<AppInfoEntity> = arrayListOf()
             getInstalledApps().forEach {
-                postApi.getGenre(it.packageName).apply {
-                    this.body()?.data?.takeIf { data ->
-                        data.size > 1
-                    }?.let { data ->
-                        list.add(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genreName = data[1]))
-                    } ?: apply {
-                        list.add(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genreName = "Other"))
+                kotlin.runCatching {
+                    postApi.getGenre(it.packageName).apply {
+                        this?.body()?.data?.takeIf { data ->
+                            data.size > 1
+                        }?.let { data ->
+                            list.add(AppInfoEntity(packageName = it.packageName,
+                                    genreType = null, genreName = data[1]))
+                        } ?: apply {
+                            list.add(AppInfoEntity(packageName = it.packageName,
+                                    genreType = null, genreName = "Other"))
+                        }
                     }
+                }.apply {
+                    appInfoDao.insertAll(*list.toTypedArray())
+                    sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
+                    doneGetData.postValue(true)
                 }
-            }.apply {
-                appInfoDao.insertAll(*list.toTypedArray())
-                sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
-                doneGetData.postValue(true)
             }
         }
     }

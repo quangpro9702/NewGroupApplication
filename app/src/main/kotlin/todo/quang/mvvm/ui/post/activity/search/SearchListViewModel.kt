@@ -19,6 +19,8 @@ import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
 import todo.quang.mvvm.utils.FIRST_LOGIN
 import todo.quang.mvvm.utils.SHARED_NAME
+import todo.quang.mvvm.utils.exception.KtException
+import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.extension.getOrEmpty
 import todo.quang.mvvm.utils.extension.postValue
 import kotlin.coroutines.CoroutineContext
@@ -28,6 +30,10 @@ class SearchListViewModel @ViewModelInject constructor(
     private val context = getApplication<Application>().applicationContext
 
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
+
+    private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
+        ExceptionBus.instance.bindException(throwable)
+    }
 
     private val doneGetData: LiveData<Boolean> = liveData {
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
@@ -39,13 +45,13 @@ class SearchListViewModel @ViewModelInject constructor(
 
     private val queryLiveData: LiveData<String> = MutableLiveData()
 
-    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData {
+    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
         getInstalledApps().forEach {
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
                 list.add(AppInfoDataItem(this, it))
             } ?: apply {
-                val app = postApi.getGenre(it.packageName)
+                val app = postApi.getGenre(it.packageName) ?: throw KtException(0, "Không tìm thấy Privileges")
                 app.body()?.data?.takeIf { data ->
                     data.size > 1
                 }?.let { data ->
@@ -90,16 +96,12 @@ class SearchListViewModel @ViewModelInject constructor(
 
     fun searchApp(query: String) = queryLiveData.postValue(query)
 
-    private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
-        ExceptionBus.instance.bindException(throwable)
-    }
-
     private fun loadPosts() {
         viewModelScope.launch(Dispatchers.IO + handler) {
             val list: ArrayList<AppInfoEntity> = arrayListOf()
             getInstalledApps().forEach {
                 postApi.getGenre(it.packageName).apply {
-                    this.body()?.data?.takeIf { data ->
+                    this?.body()?.data?.takeIf { data ->
                         data.size > 1
                     }?.let { data ->
                         list.add(AppInfoEntity(packageName = it.packageName,
