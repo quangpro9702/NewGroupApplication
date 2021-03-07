@@ -8,5 +8,5 @@ import todo.quang.mvvm.network.model.AppInfoData
 
 interface PostApi {
     @GET("api")
-    suspend fun getGenre(@Query("id") id: String): Response<AppInfoData?>?
+    suspend fun getGenre(@Query("id") id: String,@Query("hl") hl: String): Response<AppInfoData?>?
 }

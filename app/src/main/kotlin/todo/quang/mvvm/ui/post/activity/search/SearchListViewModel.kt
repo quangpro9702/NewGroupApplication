@@ -17,17 +17,19 @@ import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
-import todo.quang.mvvm.utils.FIRST_LOGIN
 import todo.quang.mvvm.utils.SHARED_NAME
-import todo.quang.mvvm.utils.exception.KtException
 import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.extension.getOrEmpty
 import todo.quang.mvvm.utils.extension.postValue
+import java.util.*
+import kotlin.collections.HashSet
 import kotlin.coroutines.CoroutineContext
 
 class SearchListViewModel @ViewModelInject constructor(
         application: Application, private val appInfoDao: AppInfoDao, private val postApi: PostApi) : AndroidViewModel(application) {
     private val context = getApplication<Application>().applicationContext
+
+    private val locale = Locale.getDefault().language
 
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
 
@@ -35,12 +37,8 @@ class SearchListViewModel @ViewModelInject constructor(
         ExceptionBus.instance.bindException(throwable)
     }
 
-    private val doneGetData: LiveData<Boolean> = liveData {
-        if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
-            loadPosts()
-        } else {
-            emit(true)
-        }
+    private val doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
+        emit(true)
     }
 
     private val queryLiveData: LiveData<String> = MutableLiveData()
@@ -51,11 +49,11 @@ class SearchListViewModel @ViewModelInject constructor(
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
                 list.add(AppInfoDataItem(this, it))
             } ?: apply {
-                val app = postApi.getGenre(it.packageName) ?: throw KtException(0, "Không tìm thấy Privileges")
+                val app = postApi.getGenre(it.packageName, locale)
+                        ?: throw KvException(0, "Không tìm thấy App")
                 app.body()?.data?.takeIf { data ->
                     data.size > 1
                 }?.let { data ->
-                    /*Truong hop khong tim thay trong database*/
                     val appInsert = AppInfoEntity(packageName = it.packageName,
                             genreType = null, genreName = data[1])
                     appInfoDao.insertAll(appInsert)
@@ -96,26 +94,26 @@ class SearchListViewModel @ViewModelInject constructor(
 
     fun searchApp(query: String) = queryLiveData.postValue(query)
 
-    private fun loadPosts() {
-        viewModelScope.launch(Dispatchers.IO + handler) {
-            val list: ArrayList<AppInfoEntity> = arrayListOf()
-            getInstalledApps().forEach {
-                postApi.getGenre(it.packageName).apply {
-                    this?.body()?.data?.takeIf { data ->
-                        data.size > 1
-                    }?.let { data ->
-                        list.add(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genreName = data[1]))
-                    } ?: apply {
-                        list.add(AppInfoEntity(packageName = it.packageName,
-                                genreType = null, genreName = "Other"))
-                    }
+    private suspend fun loadPosts() {
+        val list: ArrayList<AppInfoEntity> = arrayListOf()
+        getInstalledApps().forEach {
+            kotlin.runCatching { postApi.getGenre(it.packageName, locale) }.getOrNull()?.apply {
+                this.body()?.data?.takeIf { data ->
+                    data.size > 1
+                }?.let { data ->
+                    list.add(AppInfoEntity(packageName = it.packageName,
+                            genreType = null, genreName = data[1]))
+                } ?: apply {
+                    list.add(AppInfoEntity(packageName = it.packageName,
+                            genreType = null, genreName = "Other"))
                 }
-            }.apply {
-                appInfoDao.insertAll(*list.toTypedArray())
-                sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
-                doneGetData.postValue(true)
+            } ?: apply {
+                list.add(AppInfoEntity(packageName = it.packageName,
+                        genreType = null, genreName = "Other"))
             }
+        }.apply {
+            appInfoDao.insertAll(*list.toTypedArray())
+            sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
         }
     }
 

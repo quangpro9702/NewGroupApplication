@@ -10,6 +10,7 @@ import todo.quang.mvvm.R
 import todo.quang.mvvm.ui.post.activity.home.PostListActivity
 
 
+/*
 class HomeScreenWidget : AppWidgetProvider() {
     override fun onUpdate(
             context: Context,
@@ -34,3 +35,4 @@ class HomeScreenWidget : AppWidgetProvider() {
 
     }
 }
+*/

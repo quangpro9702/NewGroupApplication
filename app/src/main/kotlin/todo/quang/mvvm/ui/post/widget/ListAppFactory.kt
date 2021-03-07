@@ -19,6 +19,7 @@ import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.model.database.AppDatabase
 
+/*
 class ListAppFactory(
         private val context: Context, private val intent: Intent
 ) : RemoteViewsService.RemoteViewsFactory {
@@ -83,11 +84,13 @@ class ListAppFactory(
         view.setImageViewBitmap(R.id.imgFirst, icon)
         view.setTextViewText(R.id.imgSecond, "${itemApp.packageInfo.packageName}")
         Log.d("todoapp", "getViewAt: ${itemApp.packageInfo.packageName}")
-        /*Glide
+        */
+/*Glide
                 .with(view)
                 .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                 .centerInside()
-                .into(view.imgFirst)*/
+                .into(view.imgFirst)*//*
+
 
         val i = Intent()
         val extras = Bundle()
@@ -97,6 +100,7 @@ class ListAppFactory(
         view.setOnClickFillInIntent(R.id.imgFirst, i)
 
         return view
+*/
 /*
 
         view.imgSecond.visibleOrGone(item.size > 1)
@@ -174,7 +178,8 @@ class ListAppFactory(
                         .into(view.imgFourthh)
             }
         }
-*/
+*//*
+
     }
 
     override fun getLoadingView(): RemoteViews {
@@ -249,3 +254,4 @@ class ListAppFactory(
     data class AppInfoDataItem(val appInfoEntity: AppInfoEntity, val packageInfo: PackageInfo)
 
 }
+*/
