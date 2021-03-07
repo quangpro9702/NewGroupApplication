@@ -1,5 +1,7 @@
 package todo.quang.mvvm.ui.post.fragment.dialoglist
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -49,14 +51,12 @@ class DialogListAppFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        dialog?.window?.setLayout(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT
-        )
+        dialog?.window?.let {
+            it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
     }
 
     private fun setupView() {
-
         binding.recyclerList.setHasFixedSize(true)
 
         binding.recyclerList.layoutManager = GridLayoutManager(requireActivity(), 4)

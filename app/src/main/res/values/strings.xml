@@ -6,4 +6,6 @@
     <string name="content_description_search">Search</string>
     <string name="content_description_more">More</string>
     <string name="hint_search_app">Search Name</string>
+    <string name="recent_group">Gần đây</string>
+    <string name="top_group">Sử dụng nhiều nhất</string>
 </resources>

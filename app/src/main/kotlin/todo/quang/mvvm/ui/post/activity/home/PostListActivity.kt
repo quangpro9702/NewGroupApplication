@@ -2,17 +2,18 @@ package todo.quang.mvvm.ui.post.activity.home
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Window
+import android.view.WindowManager
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
-import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_post_list.*
 import todo.quang.mvvm.R
-import todo.quang.mvvm.base.BottomAppBarCutCornersTopEdge
 import todo.quang.mvvm.databinding.ActivityPostListBinding
 import todo.quang.mvvm.ui.post.activity.search.SearchListActivity
 import todo.quang.mvvm.ui.post.fragment.home.HomeCategoryFragment
+
 
 @AndroidEntryPoint
 class PostListActivity : FragmentActivity() {
@@ -36,13 +37,13 @@ class PostListActivity : FragmentActivity() {
     }
 
     private fun setView() {
-        val topEdge = BottomAppBarCutCornersTopEdge(
-                binding.bottomAppBar.fabCradleMargin,
-                binding.bottomAppBar.fabCradleRoundedCornerRadius,
-                binding.bottomAppBar.cradleVerticalOffset
-        )
-        val background = bottomAppBar.background as MaterialShapeDrawable
-        background.shapeAppearanceModel = background.shapeAppearanceModel.toBuilder().setTopEdge(topEdge).build()
+        /*   val topEdge = BottomAppBarCutCornersTopEdge(
+                   binding.bottomAppBar.fabCradleMargin,
+                   binding.bottomAppBar.fabCradleRoundedCornerRadius,
+                   binding.bottomAppBar.cradleVerticalOffset
+           )
+           val background = bottomAppBar.background as MaterialShapeDrawable
+           background.shapeAppearanceModel = background.shapeAppearanceModel.toBuilder().setTopEdge(topEdge).build()*/
     }
 
     private fun setOnClickListener() {

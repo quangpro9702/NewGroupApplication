@@ -10,6 +10,8 @@
         <FrameLayout
             android:id="@+id/nav_host_fragment"
             android:layout_width="match_parent"
+            android:paddingBottom="@dimen/_26sdp"
+            android:clipToPadding="false"
             android:layout_height="match_parent" />
 
         <com.google.android.material.bottomappbar.BottomAppBar

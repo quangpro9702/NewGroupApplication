@@ -1,6 +1,7 @@
 package todo.quang.mvvm.ui.post.adapter
 
 import android.content.pm.PackageManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,100 +36,102 @@ class CategoryAdapter(
     }
 
     override fun bind(view: View, viewType: Int, position: Int, item: List<PostListViewModel.AppInfoDataItem>) {
-        var itemApp = item[0]
-        Glide
-                .with(view)
-                .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
-                .centerInside()
-                .into(view.imgFirst)
-        view.imgFirst.setOnClickListener {
-            openApp.invoke(item[0].packageInfo.packageName, item[0].appInfoEntity)
-        }
-        view.tvTitle.text = when (position) {
-            0 -> {
-                "Recent"
-            }
-            1 -> {
-                "Top Click"
-            }
-            else -> {
-                itemApp.appInfoEntity.genreName
-            }
-        }
-
-        view.imgSecond.visibleOrGone(item.size > 1)
-        if (item.size > 1) {
-            itemApp = item[1]
+        if(item.isNotEmpty()){
+            var itemApp = item[0]
             Glide
                     .with(view)
                     .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                     .centerInside()
-                    .into(view.imgSecond)
-            view.imgSecond.setOnClickListener {
-                openApp.invoke(item[1].packageInfo.packageName, item[1].appInfoEntity)
+                    .into(view.imgFirst)
+            view.imgFirst.setOnClickListener {
+                openApp.invoke(item[0].packageInfo.packageName, item[0].appInfoEntity)
             }
-        }
-        view.imgThird.visibleOrGone(item.size > 2)
-        if (item.size > 2) {
-            itemApp = item[2]
-            Glide
-                    .with(view)
-                    .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
-                    .centerInside()
-                    .into(view.imgThird)
-            view.imgThird.setOnClickListener {
-                openApp.invoke(item[2].packageInfo.packageName, item[2].appInfoEntity)
-            }
-        }
-        view.layoutGroup.visibleOrGone(item.size > 4)
-        view.imgFourth.visibleOrGone(item.size == 4)
-        if (item.size == 4) {
-            itemApp = item[3]
-            Glide
-                    .with(view)
-                    .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
-                    .centerInside()
-                    .into(view.imgFourth)
-            view.imgFourth.setOnClickListener {
-                openApp.invoke(item[3].packageInfo.packageName, item[3].appInfoEntity)
-            }
-        } else if (item.size > 4) {
-            view.layoutGroup.setOnClickListener {
-                showListApp.invoke(position)
+            view.tvTitle.text = when (position) {
+                0 -> {
+                    view.context.getString(R.string.recent_group)
+                }
+                1 -> {
+                    view.context.getString(R.string.top_group)
+                }
+                else -> {
+                    itemApp.appInfoEntity.genreName
+                }
             }
 
-            itemApp = item[3]
-            Glide
-                    .with(view)
-                    .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
-                    .centerInside()
-                    .into(view.imgFirstt)
-            view.imgSecondd.visibleOrGone(item.size > 5)
-            if (item.size > 5) {
-                itemApp = item[4]
+            view.imgSecond.visibleOrGone(item.size > 1)
+            if (item.size > 1) {
+                itemApp = item[1]
                 Glide
                         .with(view)
                         .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                         .centerInside()
-                        .into(view.imgSecondd)
+                        .into(view.imgSecond)
+                view.imgSecond.setOnClickListener {
+                    openApp.invoke(item[1].packageInfo.packageName, item[1].appInfoEntity)
+                }
             }
-            view.imgThirdd.visibleOrGone(item.size > 6)
-            if (item.size > 6) {
-                itemApp = item[5]
+            view.imgThird.visibleOrGone(item.size > 2)
+            if (item.size > 2) {
+                itemApp = item[2]
                 Glide
                         .with(view)
                         .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                         .centerInside()
-                        .into(view.imgThirdd)
+                        .into(view.imgThird)
+                view.imgThird.setOnClickListener {
+                    openApp.invoke(item[2].packageInfo.packageName, item[2].appInfoEntity)
+                }
             }
-            view.imgFourthh.visibleOrGone(item.size > 7)
-            if (item.size > 7) {
-                itemApp = item[6]
+            view.layoutGroup.visibleOrGone(item.size > 4)
+            view.imgFourth.visibleOrGone(item.size == 4)
+            if (item.size == 4) {
+                itemApp = item[3]
                 Glide
                         .with(view)
                         .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                         .centerInside()
-                        .into(view.imgFourthh)
+                        .into(view.imgFourth)
+                view.imgFourth.setOnClickListener {
+                    openApp.invoke(item[3].packageInfo.packageName, item[3].appInfoEntity)
+                }
+            } else if (item.size > 4) {
+                view.layoutGroup.setOnClickListener {
+                    showListApp.invoke(position)
+                }
+
+                itemApp = item[3]
+                Glide
+                        .with(view)
+                        .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                        .centerInside()
+                        .into(view.imgFirstt)
+                view.imgSecondd.visibleOrGone(item.size >= 5)
+                if (item.size >= 5) {
+                    itemApp = item[4]
+                    Glide
+                            .with(view)
+                            .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                            .centerInside()
+                            .into(view.imgSecondd)
+                }
+                view.imgThirdd.visibleOrGone(item.size >= 6)
+                if (item.size >= 6) {
+                    itemApp = item[5]
+                    Glide
+                            .with(view)
+                            .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                            .centerInside()
+                            .into(view.imgThirdd)
+                }
+                view.imgFourthh.visibleOrGone(item.size >= 7)
+                if (item.size >= 7) {
+                    itemApp = item[6]
+                    Glide
+                            .with(view)
+                            .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
+                            .centerInside()
+                            .into(view.imgFourthh)
+                }
             }
         }
     }

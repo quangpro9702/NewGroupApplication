@@ -8,14 +8,14 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="@dimen/_120sdp"
-        android:layout_margin="@dimen/_8sdp"
+        android:layout_margin="@dimen/_6sdp"
         android:padding="@dimen/_8sdp"
         app:cardCornerRadius="@dimen/_20sdp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#00000000">
+            android:background="@color/colorPrimaryDark"
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/imgFirst"
@@ -173,6 +173,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="10dp"
+      android:padding="@dimen/_6sdp"
         android:textColor="#000000" />
 </LinearLayout>
