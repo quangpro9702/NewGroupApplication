@@ -13,15 +13,14 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import androidx.room.Room
 import todo.quang.mvvm.R
 import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
-
-
-private const val REMOTE_VIEW_COUNT: Int = 10
+import todo.quang.mvvm.model.database.AppDatabase
 
 class ListAppFactory(
-        private val context: Context, val appInfoDao: AppInfoDao, private val intent: Intent
+        private val context: Context, private val intent: Intent
 ) : RemoteViewsService.RemoteViewsFactory {
     private val widgetItems: MutableList<List<AppInfoDataItem>> = mutableListOf()
     private var appWidgetId = 0
@@ -29,14 +28,22 @@ class ListAppFactory(
             "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
 
 
+    init {
+        val db: AppDatabase = synchronized(AppDatabase::class.java) {
+            Room.databaseBuilder(context,
+                    AppDatabase::class.java, AppDatabase.DATABASE_NAME)
+                    .allowMainThreadQueries()
+                    .build()
+        }
+        mapPackageInfo(db.appInfoDao())
+    }
+
     override fun onCreate() {
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
-        mapPackageInfo()
     }
 
     override fun onDataSetChanged() {
-        TODO("Not yet implemented")
     }
 
     override fun onDestroy() {
@@ -74,6 +81,8 @@ class ListAppFactory(
         val itemApp = item[0]
         val icon = drawableToBitmap(itemApp.packageInfo.applicationInfo.loadIcon(context.packageManager))
         view.setImageViewBitmap(R.id.imgFirst, icon)
+        view.setTextViewText(R.id.imgSecond, "${itemApp.packageInfo.packageName}")
+        Log.d("todoapp", "getViewAt: ${itemApp.packageInfo.packageName}")
         /*Glide
                 .with(view)
                 .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
@@ -180,7 +189,7 @@ class ListAppFactory(
 
     override fun hasStableIds(): Boolean = true
 
-    private fun mapPackageInfo() {
+    private fun mapPackageInfo(appInfoDao: AppInfoDao) {
         val list: MutableList<AppInfoDataItem> = mutableListOf()
         getInstalledApps().forEach {
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
