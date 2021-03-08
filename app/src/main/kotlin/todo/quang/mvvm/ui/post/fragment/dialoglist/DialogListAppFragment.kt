@@ -10,11 +10,13 @@ import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.transition.MaterialContainerTransform
 import dagger.hilt.android.AndroidEntryPoint
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.FragmentDialogListAppBinding
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.adapter.ListAppAdapter
+import todo.quang.mvvm.utils.extension.themeColor
 
 @AndroidEntryPoint
 class DialogListAppFragment : DialogFragment() {
@@ -39,6 +41,12 @@ class DialogListAppFragment : DialogFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
+        /*sharedElementEnterTransition = MaterialContainerTransform().apply {
+            drawingViewId = R.id.nav_host_fragment
+            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+            scrimColor = Color.TRANSPARENT
+            setAllContainerColors(requireContext().themeColor(R.attr.colorSurface))
+        }*/
         return inflater.inflate(R.layout.fragment_dialog_list_app, container, false)
     }
 

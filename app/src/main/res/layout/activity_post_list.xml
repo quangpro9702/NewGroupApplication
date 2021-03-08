@@ -7,6 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <FrameLayout
             android:id="@+id/nav_host_fragment"
             android:layout_width="match_parent"
@@ -28,8 +29,11 @@
             style="@style/Widget.App.FloatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:backgroundTint="@color/orange_200"
+            app:borderWidth="0dp"
+            app:elevation="@dimen/_6sdp"
             app:layout_anchor="@id/bottomAppBar"
-            app:srcCompat="@drawable/ic_add"
+            app:srcCompat="@drawable/ic_search_material"
             tools:ignore="VectorDrawableCompat" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

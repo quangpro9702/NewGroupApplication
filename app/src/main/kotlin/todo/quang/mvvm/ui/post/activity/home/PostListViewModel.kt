@@ -9,9 +9,11 @@ import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.base.switchMapLiveData
 import todo.quang.mvvm.base.switchMapLiveDataEmit
 import todo.quang.mvvm.model.AppInfoDao
@@ -21,8 +23,8 @@ import todo.quang.mvvm.ui.post.ExceptionBus
 import todo.quang.mvvm.utils.FIRST_LOGIN
 import todo.quang.mvvm.utils.SHARED_NAME
 import todo.quang.mvvm.utils.exception.KvException
+import todo.quang.mvvm.utils.exception.isNetworkAvailable
 import todo.quang.mvvm.utils.extension.postValue
-import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.HashSet
 import kotlin.coroutines.CoroutineContext
@@ -33,22 +35,22 @@ class PostListViewModel @ViewModelInject constructor(
     private val context = getApplication<Application>().applicationContext
     private val locale = Locale.getDefault().language
 
-
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
 
     private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
         ExceptionBus.instance.bindException(throwable)
     }
 
-    private val genresGame = listOf("ACTION", "ADVENTURE", "ARCADE", "BOARD", "CARD", "CASINO", "CASUAL", "EDUCATIONAL", "MUSIC", "PUZZLE", "RACING",
-            "ROLE_PLAYING", "SIMULATION", "SPORTS", "STRATEGY", "TRIVIA", "WORD")
-
-    private val genresGameVN = listOf("Chiến thuật", "Dạng bảng", "Đố vui", "Đua xe", "Giáo dục", "Hành động", "Mô phỏng", "Nhạc", "Nhập vai", "Phiêu lưu", "Sòng bạc",
-            "Thẻ bài", "Thể thao", "Thông thường", "Tìm ô chữ", "Trò chơi điện tử")
+    val loadingProgressBar: LiveData<RetrieveDataState<Boolean>> = MutableLiveData()
 
     private val doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
+        loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
-            loadPosts()
+            if (context.isNetworkAvailable()) {
+                loadPosts()
+            } else {
+                loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable("Đồng bộ data yêu cầu kết nối mạng")))
+            }
         } else {
             emit(true)
         }
@@ -62,16 +64,18 @@ class PostListViewModel @ViewModelInject constructor(
             } ?: apply {
                 val app = postApi.getGenre(it.packageName, locale)
                         ?: throw KvException(0, "Không tìm thấy App")
-                app.body()?.data?.takeIf { data ->
-                    data.size > 1
-                }?.let { data ->
-                    val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = data[1])
-                    appInfoDao.insertAll(appInsert)
-                    list.add(AppInfoDataItem(appInsert, it))
+                app.body()?.let { response ->
+                    response.data.takeIf { data ->
+                        data.size > 1
+                    }?.let { data ->
+                        val appInsert = AppInfoEntity(packageName = it.packageName,
+                                genreType = response.genre, genreName = data[1])
+                        appInfoDao.insertAll(appInsert)
+                        list.add(AppInfoDataItem(appInsert, it))
+                    }
                 } ?: apply {
                     val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = "Other")
+                            genreType = "app", genreName = "Other")
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -84,11 +88,7 @@ class PostListViewModel @ViewModelInject constructor(
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            var genreFilter = genresGame
-            if (locale == "vi") {
-                genreFilter = genresGameVN
-            }
-            genreFilter.contains(it.appInfoEntity.genreName.toUpperCase())
+            it.appInfoEntity.genreType == "game"
         }
     }
 
@@ -96,11 +96,7 @@ class PostListViewModel @ViewModelInject constructor(
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            var genreFilter = genresGame
-            if (locale == "vi") {
-                genreFilter = genresGameVN
-            }
-            !genreFilter.contains(it.appInfoEntity.genreName.toUpperCase())
+            it.appInfoEntity.genreType != "game"
         }
     }
 
@@ -114,8 +110,11 @@ class PostListViewModel @ViewModelInject constructor(
         }.groupBy {
             it.appInfoEntity.genreName
         }.apply {
-            this.map { it.value }.sortedBy { it.getOrNull(0)?.appInfoEntity?.genreName }.apply {
+            this.map { it.value }.sortedBy {
+                it.getOrNull(0)?.appInfoEntity?.genreName
+            }.apply {
                 listApp.addAll(this)
+                loadingProgressBar.postValue(RetrieveDataState.Success(true))
                 emit(listApp)
             }
         }
@@ -125,7 +124,10 @@ class PostListViewModel @ViewModelInject constructor(
         it.groupBy {
             it.appInfoEntity.genreName
         }.apply {
-            this.map { it.value }.sortedBy { it.getOrNull(0)?.appInfoEntity?.genreName }.apply {
+            this.map { it.value }.sortedBy {
+                it.getOrNull(0)?.appInfoEntity?.genreName
+            }.apply {
+                loadingProgressBar.postValue(RetrieveDataState.Success(true))
                 emit(this)
             }
         }
@@ -134,13 +136,20 @@ class PostListViewModel @ViewModelInject constructor(
     private suspend fun loadPosts() {
         val list: ArrayList<AppInfoEntity> = arrayListOf()
         getInstalledApps().forEach {
-            kotlin.runCatching { postApi.getGenre(it.packageName, locale) }.getOrNull()?.apply {
-                this.body()?.data?.takeIf { data ->
-                    data.size > 1
-                }?.let { data ->
-                    list.add(AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = data[1]))
+            kotlin.runCatching { postApi.getGenre(it.packageName, locale) }.getOrNull()?.let { response ->
+                response.body()?.let { response ->
+                    response.data.takeIf { data ->
+                        data.size > 1
+                    }?.let { data ->
+                        list.add(AppInfoEntity(packageName = it.packageName,
+                                genreType = response.genre, genreName = data[1]))
+                    }
                 }
+            } ?: apply {
+                val appInsert = AppInfoEntity(packageName = it.packageName,
+                        genreType = "app", genreName = "Other")
+                appInfoDao.insertAll(appInsert)
+                list.add(appInsert)
             }
         }.apply {
             appInfoDao.insertAll(*list.toTypedArray())

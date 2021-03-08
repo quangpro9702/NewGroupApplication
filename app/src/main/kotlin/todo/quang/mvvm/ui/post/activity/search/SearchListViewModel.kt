@@ -51,16 +51,18 @@ class SearchListViewModel @ViewModelInject constructor(
             } ?: apply {
                 val app = postApi.getGenre(it.packageName, locale)
                         ?: throw KvException(0, "Không tìm thấy App")
-                app.body()?.data?.takeIf { data ->
-                    data.size > 1
-                }?.let { data ->
-                    val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = data[1])
-                    appInfoDao.insertAll(appInsert)
-                    list.add(AppInfoDataItem(appInsert, it))
+                app.body()?.let { response ->
+                    response.data.takeIf { data ->
+                        data.size > 1
+                    }?.let { data ->
+                        val appInsert = AppInfoEntity(packageName = it.packageName,
+                                genreType = response.genre, genreName = data[1])
+                        appInfoDao.insertAll(appInsert)
+                        list.add(AppInfoDataItem(appInsert, it))
+                    }
                 } ?: apply {
                     val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = "Other")
+                            genreType = "app", genreName = "Other")
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -93,29 +95,6 @@ class SearchListViewModel @ViewModelInject constructor(
     }
 
     fun searchApp(query: String) = queryLiveData.postValue(query)
-
-    private suspend fun loadPosts() {
-        val list: ArrayList<AppInfoEntity> = arrayListOf()
-        getInstalledApps().forEach {
-            kotlin.runCatching { postApi.getGenre(it.packageName, locale) }.getOrNull()?.apply {
-                this.body()?.data?.takeIf { data ->
-                    data.size > 1
-                }?.let { data ->
-                    list.add(AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = data[1]))
-                } ?: apply {
-                    list.add(AppInfoEntity(packageName = it.packageName,
-                            genreType = null, genreName = "Other"))
-                }
-            } ?: apply {
-                list.add(AppInfoEntity(packageName = it.packageName,
-                        genreType = null, genreName = "Other"))
-            }
-        }.apply {
-            appInfoDao.insertAll(*list.toTypedArray())
-            sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
-        }
-    }
 
     private fun getInstalledApps(): Set<PackageInfo> {
         val packageManager: PackageManager = context.packageManager

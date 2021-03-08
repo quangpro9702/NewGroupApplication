@@ -18,7 +18,7 @@ data class AppInfoEntity(
         var name: String = "",
         var packageName: String,
         var genreName: String = "",
-        var genreType: Int?,
+        var genreType: String = "app",
         var timeRecent: Long = 0,
         var sumClick: Long = 0
 )

@@ -1,7 +1,6 @@
 package todo.quang.mvvm.ui.post.adapter
 
 import android.content.pm.PackageManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +13,7 @@ import todo.quang.mvvm.base.BaseAdapter
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.utils.extension.visibleOrGone
+
 
 class CategoryAdapter(
         private val packageManager: PackageManager,
@@ -32,16 +32,21 @@ class CategoryAdapter(
     }
 }) {
     override fun createView(parent: ViewGroup, viewType: Int?): View {
-        return parent.inflate(R.layout.item_category)
+        val view = parent.inflate(R.layout.item_category)
+        val lp = view.layoutParams
+        lp.height = parent.measuredHeight / 4
+        view.layoutParams = lp
+        return view
     }
 
     override fun bind(view: View, viewType: Int, position: Int, item: List<PostListViewModel.AppInfoDataItem>) {
-        if(item.isNotEmpty()){
+        if (item.isNotEmpty()) {
             var itemApp = item[0]
             Glide
                     .with(view)
                     .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                     .centerInside()
+                    .circleCrop()
                     .into(view.imgFirst)
             view.imgFirst.setOnClickListener {
                 openApp.invoke(item[0].packageInfo.packageName, item[0].appInfoEntity)
@@ -65,6 +70,7 @@ class CategoryAdapter(
                         .with(view)
                         .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                         .centerInside()
+                        .circleCrop()
                         .into(view.imgSecond)
                 view.imgSecond.setOnClickListener {
                     openApp.invoke(item[1].packageInfo.packageName, item[1].appInfoEntity)
@@ -77,6 +83,7 @@ class CategoryAdapter(
                         .with(view)
                         .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                         .centerInside()
+                        .circleCrop()
                         .into(view.imgThird)
                 view.imgThird.setOnClickListener {
                     openApp.invoke(item[2].packageInfo.packageName, item[2].appInfoEntity)
@@ -90,6 +97,7 @@ class CategoryAdapter(
                         .with(view)
                         .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                         .centerInside()
+                        .circleCrop()
                         .into(view.imgFourth)
                 view.imgFourth.setOnClickListener {
                     openApp.invoke(item[3].packageInfo.packageName, item[3].appInfoEntity)
@@ -104,6 +112,7 @@ class CategoryAdapter(
                         .with(view)
                         .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                         .centerInside()
+                        .circleCrop()
                         .into(view.imgFirstt)
                 view.imgSecondd.visibleOrGone(item.size >= 5)
                 if (item.size >= 5) {
@@ -112,6 +121,7 @@ class CategoryAdapter(
                             .with(view)
                             .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                             .centerInside()
+                            .circleCrop()
                             .into(view.imgSecondd)
                 }
                 view.imgThirdd.visibleOrGone(item.size >= 6)
@@ -121,6 +131,7 @@ class CategoryAdapter(
                             .with(view)
                             .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                             .centerInside()
+                            .circleCrop()
                             .into(view.imgThirdd)
                 }
                 view.imgFourthh.visibleOrGone(item.size >= 7)
@@ -130,6 +141,7 @@ class CategoryAdapter(
                             .with(view)
                             .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
                             .centerInside()
+                            .circleCrop()
                             .into(view.imgFourthh)
                 }
             }

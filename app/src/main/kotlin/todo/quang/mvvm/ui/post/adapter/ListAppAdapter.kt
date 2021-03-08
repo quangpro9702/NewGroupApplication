@@ -33,6 +33,7 @@ class ListAppAdapter(private val packageManager: PackageManager,
                 .with(view)
                 .load(item.packageInfo.applicationInfo.loadIcon(packageManager))
                 .centerInside()
+                .circleCrop()
                 .into(view.imgIcon)
         view.tvName.text = item.packageInfo.applicationInfo.loadLabel(packageManager).toString()
         view.rootView.setOnClickListener {

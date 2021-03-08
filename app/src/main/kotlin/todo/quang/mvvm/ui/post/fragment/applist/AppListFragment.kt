@@ -8,12 +8,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.fragment_app_list.*
 import todo.quang.mvvm.R
+import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.databinding.FragmentAppListBinding
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.adapter.CategoryAdapter
 import todo.quang.mvvm.ui.post.fragment.dialoglist.DialogListAppFragment
+import todo.quang.mvvm.utils.extension.gone
+import todo.quang.mvvm.utils.extension.visible
 
 @AndroidEntryPoint
 class AppListFragment : Fragment() {
@@ -25,18 +30,24 @@ class AppListFragment : Fragment() {
 
     private lateinit var categoryAdapter: CategoryAdapter
 
+    private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
+
+    private lateinit var customAlertDialogView: View
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.fragment_app_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentAppListBinding.bind(requireView())
-
         setupUI()
         setupObserve()
     }
 
     private fun setupUI() {
+        tvTitle.text = requireContext().getText(R.string.application_title)
+        materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext())
+
         binding.postList.setHasFixedSize(true)
 
         binding.postList.layoutManager = GridLayoutManager(requireActivity(), 2)
@@ -45,6 +56,15 @@ class AppListFragment : Fragment() {
             viewModel.updateAppChangeRecentInfo(app)
             openApp(packageName)
         }, {
+            /*  val emailCardDetailTransitionName = getString(R.string.transition_to_detail)
+              val extras = FragmentNavigatorExtras(view to emailCardDetailTransitionName)
+              navigate(HomeFragmentDirections.actionFirstFragmentToSecondFragment(id, title), null, extras)
+              exitTransition = MaterialElevationScale(false).apply {
+                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+              }
+              reenterTransition = MaterialElevationScale(true).apply {
+                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+              }*/
             DialogListAppFragment.newInstance(it).show(childFragmentManager, "TAG")
         }).apply {
             binding.postList.adapter = this
@@ -54,6 +74,20 @@ class AppListFragment : Fragment() {
     private fun setupObserve() {
         viewModelShare.groupAppInfoDataItem.observe(viewLifecycleOwner, {
             categoryAdapter.submitList(it)
+        })
+        viewModelShare.loadingProgressBar.observe(viewLifecycleOwner, {
+            when (it) {
+                is RetrieveDataState.Start -> {
+                    layoutLoading.visible()
+                }
+                is RetrieveDataState.Success -> {
+                    layoutLoading.gone()
+                }
+
+                is RetrieveDataState.Failure -> {
+                    layoutLoading.gone()
+                }
+            }
         })
     }
 

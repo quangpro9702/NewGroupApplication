@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">App Group</string>
+	<string name="retry">Retry</string>
+	<string name="post_error">An error occurred while loading the posts</string>
+	<string name="content_description_search">Search</string>
+	<string name="content_description_more">More</string>
+	<string name="hint_search_app">Input</string>
+	<string name="recent_group">Recently</string>
+	<string name="top_group">Most Used</string>
+	<string name="application_title">App List</string>
+	<string name="game_title">Game List</string>
+</resources>
