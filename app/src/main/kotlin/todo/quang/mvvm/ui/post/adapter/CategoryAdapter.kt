@@ -34,7 +34,7 @@ class CategoryAdapter(
     override fun createView(parent: ViewGroup, viewType: Int?): View {
         val view = parent.inflate(R.layout.item_category)
         val lp = view.layoutParams
-        lp.height = parent.measuredHeight / 4
+        lp.height = parent.measuredWidth / 2
         view.layoutParams = lp
         return view
     }

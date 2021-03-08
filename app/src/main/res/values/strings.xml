@@ -11,4 +11,6 @@
     <string name="transition_to_detail" translatable="false">transition_to_detail</string>
     <string name="application_title">Ứng dụng</string>
     <string name="game_title">Trò chơi</string>
+    <string name="waiting_sync">Lần đồng bộ đầu tiên có thể kéo dài tới 1 phút</string>
+    <string name="required_network">Đồng bộ data yêu cầu kết nối mạng</string>
 </resources>

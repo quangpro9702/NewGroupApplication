@@ -13,6 +13,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import todo.quang.mvvm.R
 import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.base.switchMapLiveData
 import todo.quang.mvvm.base.switchMapLiveDataEmit
@@ -49,7 +50,7 @@ class PostListViewModel @ViewModelInject constructor(
             if (context.isNetworkAvailable()) {
                 loadPosts()
             } else {
-                loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable("Đồng bộ data yêu cầu kết nối mạng")))
+                loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
             }
         } else {
             emit(true)
@@ -121,14 +122,21 @@ class PostListViewModel @ViewModelInject constructor(
     }
 
     val groupGameInfoDataItem: LiveData<List<List<AppInfoDataItem>>> = listGameFilter.switchMapLiveData { it ->
-        it.groupBy {
+        val listApp: MutableList<List<AppInfoDataItem>> = mutableListOf()
+        it.apply {
+            //List recent
+            listApp.add(this.sortedByDescending { it.appInfoEntity.timeRecent }.take(4))
+            //List top used
+            listApp.add(this.sortedByDescending { it.appInfoEntity.sumClick }.take(4))
+        }.groupBy {
             it.appInfoEntity.genreName
         }.apply {
             this.map { it.value }.sortedBy {
                 it.getOrNull(0)?.appInfoEntity?.genreName
             }.apply {
+                listApp.addAll(this)
                 loadingProgressBar.postValue(RetrieveDataState.Success(true))
-                emit(this)
+                emit(listApp)
             }
         }
     }

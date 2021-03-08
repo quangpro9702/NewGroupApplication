@@ -9,7 +9,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_app_list.*
+import kotlinx.android.synthetic.main.fragment_game_list.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.FragmentGameListBinding
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel

@@ -10,4 +10,6 @@
 	<string name="top_group">Most Used</string>
 	<string name="application_title">App List</string>
 	<string name="game_title">Game List</string>
+	<string name="waiting_sync">The first synchronization can take up to 1 minute</string>
+	<string name="required_network">Data synchronization requires network connection</string>
 </resources>

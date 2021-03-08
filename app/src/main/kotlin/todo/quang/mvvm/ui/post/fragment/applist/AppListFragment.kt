@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_app_list.*
+import kotlinx.android.synthetic.main.layout_loading.view.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.databinding.FragmentAppListBinding
@@ -78,6 +80,7 @@ class AppListFragment : Fragment() {
         viewModelShare.loadingProgressBar.observe(viewLifecycleOwner, {
             when (it) {
                 is RetrieveDataState.Start -> {
+                    layoutLoading.rootView.tvAnimation.text = getString(R.string.waiting_sync)
                     layoutLoading.visible()
                 }
                 is RetrieveDataState.Success -> {
@@ -86,6 +89,7 @@ class AppListFragment : Fragment() {
 
                 is RetrieveDataState.Failure -> {
                     layoutLoading.gone()
+                    Toast.makeText(context, it.throwable.message, Toast.LENGTH_SHORT).show()
                 }
             }
         })
