@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_category.view.*
@@ -130,7 +131,7 @@ class CategoryAdapter(
                     Glide
                             .with(view)
                             .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
-                            .centerInside()
+                            .fitCenter()
                             .circleCrop()
                             .into(view.imgThirdd)
                 }

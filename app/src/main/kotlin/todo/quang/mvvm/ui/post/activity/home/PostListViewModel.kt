@@ -21,7 +21,9 @@ import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
+import todo.quang.mvvm.utils.APP_CONFIG
 import todo.quang.mvvm.utils.FIRST_LOGIN
+import todo.quang.mvvm.utils.GAME_CONFIG
 import todo.quang.mvvm.utils.SHARED_NAME
 import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.exception.isNetworkAvailable
@@ -76,7 +78,7 @@ class PostListViewModel @ViewModelInject constructor(
                     }
                 } ?: apply {
                     val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = "app", genreName = "Other")
+                            genreType = APP_CONFIG, genreName = "Other")
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -89,7 +91,7 @@ class PostListViewModel @ViewModelInject constructor(
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            it.appInfoEntity.genreType == "game"
+            it.appInfoEntity.genreType == GAME_CONFIG
         }
     }
 
@@ -97,7 +99,7 @@ class PostListViewModel @ViewModelInject constructor(
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            it.appInfoEntity.genreType != "game"
+            it.appInfoEntity.genreType != GAME_CONFIG
         }
     }
 
@@ -111,33 +113,43 @@ class PostListViewModel @ViewModelInject constructor(
         }.groupBy {
             it.appInfoEntity.genreName
         }.apply {
-            this.map { it.value }.sortedBy {
-                it.getOrNull(0)?.appInfoEntity?.genreName
-            }.apply {
-                listApp.addAll(this)
-                loadingProgressBar.postValue(RetrieveDataState.Success(true))
-                emit(listApp)
-            }
+            this
+                    .map {
+                        it.value
+                    }
+                    .sortedBy {
+                        it.getOrNull(0)?.appInfoEntity?.genreName
+                    }
+                    .apply {
+                        listApp.addAll(this)
+                        loadingProgressBar.postValue(RetrieveDataState.Success(true))
+                        emit(listApp.filter { it.isNotEmpty() })
+                    }
         }
     }
 
     val groupGameInfoDataItem: LiveData<List<List<AppInfoDataItem>>> = listGameFilter.switchMapLiveData { it ->
-        val listApp: MutableList<List<AppInfoDataItem>> = mutableListOf()
+        val listGame: MutableList<List<AppInfoDataItem>> = mutableListOf()
         it.apply {
             //List recent
-            listApp.add(this.sortedByDescending { it.appInfoEntity.timeRecent }.take(4))
+            listGame.add(this.sortedByDescending { it.appInfoEntity.timeRecent }.take(4))
             //List top used
-            listApp.add(this.sortedByDescending { it.appInfoEntity.sumClick }.take(4))
+            listGame.add(this.sortedByDescending { it.appInfoEntity.sumClick }.take(4))
         }.groupBy {
             it.appInfoEntity.genreName
         }.apply {
-            this.map { it.value }.sortedBy {
-                it.getOrNull(0)?.appInfoEntity?.genreName
-            }.apply {
-                listApp.addAll(this)
-                loadingProgressBar.postValue(RetrieveDataState.Success(true))
-                emit(listApp)
-            }
+            this
+                    .map {
+                        it.value
+                    }
+                    .sortedBy {
+                        it.getOrNull(0)?.appInfoEntity?.genreName
+                    }
+                    .apply {
+                        listGame.addAll(this)
+                        loadingProgressBar.postValue(RetrieveDataState.Success(true))
+                        emit(listGame.filter { it.isNotEmpty() })
+                    }
         }
     }
 
@@ -155,13 +167,13 @@ class PostListViewModel @ViewModelInject constructor(
                 }
             } ?: apply {
                 val appInsert = AppInfoEntity(packageName = it.packageName,
-                        genreType = "app", genreName = "Other")
+                        genreType = APP_CONFIG, genreName = "Other")
                 appInfoDao.insertAll(appInsert)
                 list.add(appInsert)
             }
         }.apply {
             appInfoDao.insertAll(*list.toTypedArray())
-            sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
+            sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
             doneGetData.postValue(true)
         }
     }
