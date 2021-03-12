@@ -11,4 +11,9 @@
     <string name="transition_to_detail" translatable="false">transition_to_detail</string>
     <string name="application_title">Ứng dụng</string>
     <string name="game_title">Trò chơi</string>
+    <string name="action_reload">Load lại dữ liệu</string>
+    <string name="notify_reload">Bạn chỉ nên load lại dữ liệu nếu không tìm được ứng dụng hoặc bị sai thư mục</string>
+    <string name="notify_title">Thông báo</string>
+    <string name="cancel_action">Huỷ</string>
+    <string name="accept_action">Đồng ý</string>
 </resources>

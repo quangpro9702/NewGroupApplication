@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -56,15 +57,6 @@ class AppListFragment : Fragment() {
             viewModel.updateAppChangeRecentInfo(app)
             openApp(packageName)
         }, {
-            /*  val emailCardDetailTransitionName = getString(R.string.transition_to_detail)
-              val extras = FragmentNavigatorExtras(view to emailCardDetailTransitionName)
-              navigate(HomeFragmentDirections.actionFirstFragmentToSecondFragment(id, title), null, extras)
-              exitTransition = MaterialElevationScale(false).apply {
-                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-              }
-              reenterTransition = MaterialElevationScale(true).apply {
-                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-              }*/
             DialogListAppFragment.newInstance(it).show(childFragmentManager, "TAG")
         }).apply {
             binding.postList.adapter = this
@@ -86,6 +78,7 @@ class AppListFragment : Fragment() {
 
                 is RetrieveDataState.Failure -> {
                     layoutLoading.gone()
+                    Toast.makeText(requireContext(), it.throwable.message, Toast.LENGTH_LONG).show()
                 }
             }
         })

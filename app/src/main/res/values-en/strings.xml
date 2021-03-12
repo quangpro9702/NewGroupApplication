@@ -10,4 +10,9 @@
 	<string name="top_group">Most Used</string>
 	<string name="application_title">App List</string>
 	<string name="game_title">Game List</string>
+	<string name="action_reload">Reloads</string>
+	<string name="notify_reload">You should only reload the data if you can not find the app or get the wrong directory</string>
+	<string name="notify_title">Notification</string>
+	<string name="cancel_action">Cancel</string>
+	<string name="accept_action">Accept</string>
 </resources>

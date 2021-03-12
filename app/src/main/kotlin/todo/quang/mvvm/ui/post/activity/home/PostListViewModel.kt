@@ -43,7 +43,7 @@ class PostListViewModel @ViewModelInject constructor(
 
     val loadingProgressBar: LiveData<RetrieveDataState<Boolean>> = MutableLiveData()
 
-    private val doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
+    private val _doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
             if (context.isNetworkAvailable()) {
@@ -56,7 +56,7 @@ class PostListViewModel @ViewModelInject constructor(
         }
     }
 
-    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
+    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = _doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
         getInstalledApps().forEach {
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
@@ -154,7 +154,7 @@ class PostListViewModel @ViewModelInject constructor(
         }.apply {
             appInfoDao.insertAll(*list.toTypedArray())
             sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
-            doneGetData.postValue(true)
+            _doneGetData.postValue(true)
         }
     }
 
@@ -182,6 +182,8 @@ class PostListViewModel @ViewModelInject constructor(
         }
         return filteredPackages
     }
+
+    fun reloadData(reload : Boolean) = _doneGetData.postValue(reload)
 
     data class AppInfoDataItem(val appInfoEntity: AppInfoEntity, val packageInfo: PackageInfo)
 }
