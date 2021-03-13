@@ -21,7 +21,6 @@ import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
 import todo.quang.mvvm.utils.*
-import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.exception.isNetworkAvailable
 import todo.quang.mvvm.utils.extension.postValue
 import java.util.*
@@ -42,6 +41,8 @@ class PostListViewModel @ViewModelInject constructor(
 
     val loadingProgressBar: LiveData<RetrieveDataState<Boolean>> = MutableLiveData()
 
+    val loadingTextShow: LiveData<String> = MutableLiveData()
+
     private val _doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
@@ -61,20 +62,22 @@ class PostListViewModel @ViewModelInject constructor(
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
                 list.add(AppInfoDataItem(this, it))
             } ?: apply {
-                val app = postApi.getGenre(it.packageName, locale)
-                        ?: throw KvException(0, "Không tìm thấy App")
-                app.body()?.let { response ->
-                    response.data.takeIf { data ->
-                        data.size > 1
-                    }?.let { data ->
-                        val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                genreType = response.genre, genreName = data[1])
-                        appInfoDao.insertAll(appInsert)
-                        list.add(AppInfoDataItem(appInsert, it))
+                kotlin.runCatching {
+                    postApi.getGenre(it.packageName, locale)
+                }.getOrNull()?.let { app ->
+                    app.body()?.let { response ->
+                        response.data.takeIf { data ->
+                            data.size > 1
+                        }?.let { data ->
+                            val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                    genreType = response.genre, genreName = data[1])
+                            appInfoDao.insertAll(appInsert)
+                            list.add(AppInfoDataItem(appInsert, it))
+                        }
                     }
                 } ?: apply {
                     val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                            genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
+                            genreType = APP_CONFIG, genreName = todo.quang.mvvm.utils.PACKAGE_OTHER)
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -170,6 +173,7 @@ class PostListViewModel @ViewModelInject constructor(
                                 genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
                         list.add(appInsert)
                     }
+                    loadingTextShow.postValue(it.applicationInfo.loadLabel(context.packageManager).toString())
                 }
             }
         }.apply {
@@ -177,29 +181,6 @@ class PostListViewModel @ViewModelInject constructor(
             sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
             _doneGetData.postValue(true)
         }
-        /* getInstalledApps().chunked(30).forEach {
-             kotlin.runCatching {
-                 postApi.getGenre(it., locale)
-             }.getOrNull()?.let { response ->
-                 response.body()?.let { response ->
-                     response.data.takeIf { data ->
-                         data.size > 1
-                     }?.let { data ->
-                         list.add(AppInfoEntity(packageName = it.packageName,
-                                 genreType = response.genre, genreName = data[1]))
-                     }
-                 }
-             } ?: apply {
-                 val appInsert = AppInfoEntity(packageName = it.packageName,
-                         genreType = APP_CONFIG, genreName = "Other")
-                 appInfoDao.insertAll(appInsert)
-                 list.add(appInsert)
-             }
-         }.apply {
-             appInfoDao.insertAll(*list.toTypedArray())
-             sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
-             doneGetData.postValue(true)
-         }*/
     }
 
     fun reloadData() = viewModelScope.launch(Dispatchers.IO + handler) {

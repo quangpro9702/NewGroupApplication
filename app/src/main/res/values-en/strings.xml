@@ -17,4 +17,5 @@
 	<string name="notify_title">Notification</string>
 	<string name="cancel_action">Cancel</string>
 	<string name="accept_action">Okay</string>
+	<string name="loading_info">Loading info: %s</string>
 </resources>

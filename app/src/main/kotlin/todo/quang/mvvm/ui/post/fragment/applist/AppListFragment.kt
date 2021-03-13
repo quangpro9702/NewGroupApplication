@@ -93,6 +93,10 @@ class AppListFragment : Fragment() {
                 }
             }
         })
+
+        viewModelShare.loadingTextShow.observe(viewLifecycleOwner, {
+            layoutLoading.rootView.tvAnimation.text = String.format(getString(R.string.loading_info), it)
+        })
     }
 
     private fun openApp(packageName: String) {

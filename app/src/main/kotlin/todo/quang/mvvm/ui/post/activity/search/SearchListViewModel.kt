@@ -1,8 +1,6 @@
 package todo.quang.mvvm.ui.post.activity.search
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
@@ -18,9 +16,6 @@ import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
 import todo.quang.mvvm.utils.APP_CONFIG
-import todo.quang.mvvm.utils.PACKAGE_OTHER
-import todo.quang.mvvm.utils.SHARED_NAME
-import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.extension.getOrEmpty
 import todo.quang.mvvm.utils.extension.postValue
 import java.util.*
@@ -32,8 +27,6 @@ class SearchListViewModel @ViewModelInject constructor(
     private val context = getApplication<Application>().applicationContext
 
     private val locale = Locale.getDefault().language
-
-    private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
 
     private val handler = CoroutineExceptionHandler { _: CoroutineContext, throwable: Throwable ->
         ExceptionBus.instance.bindException(throwable)
@@ -51,20 +44,22 @@ class SearchListViewModel @ViewModelInject constructor(
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
                 list.add(AppInfoDataItem(this, it))
             } ?: apply {
-                val app = postApi.getGenre(it.packageName, locale)
-                        ?: throw KvException(0, "Không tìm thấy App")
-                app.body()?.let { response ->
-                    response.data.takeIf { data ->
-                        data.size > 1
-                    }?.let { data ->
-                        val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                genreType = response.genre, genreName = data[1])
-                        appInfoDao.insertAll(appInsert)
-                        list.add(AppInfoDataItem(appInsert, it))
+                kotlin.runCatching {
+                    postApi.getGenre(it.packageName, locale)
+                }.getOrNull()?.let { app ->
+                    app.body()?.let { response ->
+                        response.data.takeIf { data ->
+                            data.size > 1
+                        }?.let { data ->
+                            val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                    genreType = response.genre, genreName = data[1])
+                            appInfoDao.insertAll(appInsert)
+                            list.add(AppInfoDataItem(appInsert, it))
+                        }
                     }
                 } ?: apply {
                     val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                            genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
+                            genreType = APP_CONFIG, genreName = todo.quang.mvvm.utils.PACKAGE_OTHER)
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -76,7 +71,7 @@ class SearchListViewModel @ViewModelInject constructor(
     val mergeListAppDataItem: MediatorLiveData<List<AppInfoDataItem>> = MediatorLiveData<List<AppInfoDataItem>>().apply {
         addSource(mapPackageInfoFromDataBase) { it ->
             postValue(it.sortedBy {
-                it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
+                it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString().toUpperCase()
             })
         }
         addSource(queryLiveData) { query ->

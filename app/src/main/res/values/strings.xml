@@ -18,4 +18,5 @@
     <string name="notify_title">Thông báo</string>
     <string name="cancel_action">Huỷ</string>
     <string name="accept_action">Đồng ý</string>
+    <string name="loading_info">Đang lấy thông tin của: %s \n Yêu cầu kết nối mạng ổn định</string>
 </resources>
