@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_app_list.*
+import kotlinx.android.synthetic.main.layout_loading.view.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.databinding.FragmentAppListBinding
@@ -57,6 +58,15 @@ class AppListFragment : Fragment() {
             viewModel.updateAppChangeRecentInfo(app)
             openApp(packageName)
         }, {
+            /*  val emailCardDetailTransitionName = getString(R.string.transition_to_detail)
+              val extras = FragmentNavigatorExtras(view to emailCardDetailTransitionName)
+              navigate(HomeFragmentDirections.actionFirstFragmentToSecondFragment(id, title), null, extras)
+              exitTransition = MaterialElevationScale(false).apply {
+                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+              }
+              reenterTransition = MaterialElevationScale(true).apply {
+                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+              }*/
             DialogListAppFragment.newInstance(it).show(childFragmentManager, "TAG")
         }).apply {
             binding.postList.adapter = this
@@ -70,6 +80,7 @@ class AppListFragment : Fragment() {
         viewModelShare.loadingProgressBar.observe(viewLifecycleOwner, {
             when (it) {
                 is RetrieveDataState.Start -> {
+                    layoutLoading.rootView.tvAnimation.text = getString(R.string.waiting_sync)
                     layoutLoading.visible()
                 }
                 is RetrieveDataState.Success -> {
@@ -78,7 +89,7 @@ class AppListFragment : Fragment() {
 
                 is RetrieveDataState.Failure -> {
                     layoutLoading.gone()
-                    Toast.makeText(requireContext(), it.throwable.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, it.throwable.message, Toast.LENGTH_SHORT).show()
                 }
             }
         })

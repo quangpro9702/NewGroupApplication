@@ -7,12 +7,12 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import todo.quang.mvvm.R
 import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.base.switchMapLiveData
 import todo.quang.mvvm.base.switchMapLiveDataEmit
@@ -20,7 +20,9 @@ import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
+import todo.quang.mvvm.utils.APP_CONFIG
 import todo.quang.mvvm.utils.FIRST_LOGIN
+import todo.quang.mvvm.utils.GAME_CONFIG
 import todo.quang.mvvm.utils.SHARED_NAME
 import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.exception.isNetworkAvailable
@@ -43,20 +45,20 @@ class PostListViewModel @ViewModelInject constructor(
 
     val loadingProgressBar: LiveData<RetrieveDataState<Boolean>> = MutableLiveData()
 
-    private val _doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
+    private val doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
             if (context.isNetworkAvailable()) {
                 loadPosts()
             } else {
-                loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable("Đồng bộ data yêu cầu kết nối mạng")))
+                loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
             }
         } else {
             emit(true)
         }
     }
 
-    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = _doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
+    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
         getInstalledApps().forEach {
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
@@ -75,7 +77,7 @@ class PostListViewModel @ViewModelInject constructor(
                     }
                 } ?: apply {
                     val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = "app", genreName = "Other")
+                            genreType = APP_CONFIG, genreName = "Other")
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -88,7 +90,7 @@ class PostListViewModel @ViewModelInject constructor(
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            it.appInfoEntity.genreType == "game"
+            it.appInfoEntity.genreType == GAME_CONFIG
         }
     }
 
@@ -96,7 +98,7 @@ class PostListViewModel @ViewModelInject constructor(
         it.sortedBy {
             it.packageInfo.applicationInfo.loadLabel(context.packageManager).toString()
         }.filter {
-            it.appInfoEntity.genreType != "game"
+            it.appInfoEntity.genreType != GAME_CONFIG
         }
     }
 
@@ -110,52 +112,98 @@ class PostListViewModel @ViewModelInject constructor(
         }.groupBy {
             it.appInfoEntity.genreName
         }.apply {
-            this.map { it.value }.sortedBy {
-                it.getOrNull(0)?.appInfoEntity?.genreName
-            }.apply {
-                listApp.addAll(this)
-                loadingProgressBar.postValue(RetrieveDataState.Success(true))
-                emit(listApp)
-            }
+            this
+                    .map {
+                        it.value
+                    }
+                    .sortedBy {
+                        it.getOrNull(0)?.appInfoEntity?.genreName
+                    }
+                    .apply {
+                        listApp.addAll(this)
+                        loadingProgressBar.postValue(RetrieveDataState.Success(true))
+                        emit(listApp.filter { it.isNotEmpty() })
+                    }
         }
     }
 
     val groupGameInfoDataItem: LiveData<List<List<AppInfoDataItem>>> = listGameFilter.switchMapLiveData { it ->
-        it.groupBy {
+        val listGame: MutableList<List<AppInfoDataItem>> = mutableListOf()
+        it.apply {
+            //List recent
+            listGame.add(this.sortedByDescending { it.appInfoEntity.timeRecent }.take(4))
+            //List top used
+            listGame.add(this.sortedByDescending { it.appInfoEntity.sumClick }.take(4))
+        }.groupBy {
             it.appInfoEntity.genreName
         }.apply {
-            this.map { it.value }.sortedBy {
-                it.getOrNull(0)?.appInfoEntity?.genreName
-            }.apply {
-                loadingProgressBar.postValue(RetrieveDataState.Success(true))
-                emit(this)
-            }
+            this
+                    .map {
+                        it.value
+                    }
+                    .sortedBy {
+                        it.getOrNull(0)?.appInfoEntity?.genreName
+                    }
+                    .apply {
+                        listGame.addAll(this)
+                        loadingProgressBar.postValue(RetrieveDataState.Success(true))
+                        emit(listGame.filter { it.isNotEmpty() })
+                    }
         }
     }
 
-    private suspend fun loadPosts() {
+    private suspend fun loadPosts() = viewModelScope.launch {
         val list: ArrayList<AppInfoEntity> = arrayListOf()
-        getInstalledApps().forEach {
-            kotlin.runCatching { postApi.getGenre(it.packageName, locale) }.getOrNull()?.let { response ->
-                response.body()?.let { response ->
-                    response.data.takeIf { data ->
-                        data.size > 1
-                    }?.let { data ->
-                        list.add(AppInfoEntity(packageName = it.packageName,
-                                genreType = response.genre, genreName = data[1]))
+        getInstalledApps().chunked(20).forEach {
+            withContext(Dispatchers.IO) {
+                it.forEach {
+                    kotlin.runCatching {
+                        postApi.getGenre(it.packageName, locale)
+                    }.getOrNull()?.let { response ->
+                        response.body()?.let { response ->
+                            response.data.takeIf { data ->
+                                data.size > 1
+                            }?.let { data ->
+                                list.add(AppInfoEntity(packageName = it.packageName,
+                                        genreType = response.genre, genreName = data[1]))
+                            }
+                        }
+                    } ?: apply {
+                        val appInsert = AppInfoEntity(packageName = it.packageName,
+                                genreType = APP_CONFIG, genreName = "Other")
+                        appInfoDao.insertAll(appInsert)
+                        list.add(appInsert)
                     }
                 }
-            } ?: apply {
-                val appInsert = AppInfoEntity(packageName = it.packageName,
-                        genreType = "app", genreName = "Other")
-                appInfoDao.insertAll(appInsert)
-                list.add(appInsert)
             }
         }.apply {
             appInfoDao.insertAll(*list.toTypedArray())
-            sharedPreferences.edit().putBoolean("FIRST_LOGIN", true).apply()
-            _doneGetData.postValue(true)
+            sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
+            doneGetData.postValue(true)
         }
+        /* getInstalledApps().chunked(30).forEach {
+             kotlin.runCatching {
+                 postApi.getGenre(it., locale)
+             }.getOrNull()?.let { response ->
+                 response.body()?.let { response ->
+                     response.data.takeIf { data ->
+                         data.size > 1
+                     }?.let { data ->
+                         list.add(AppInfoEntity(packageName = it.packageName,
+                                 genreType = response.genre, genreName = data[1]))
+                     }
+                 }
+             } ?: apply {
+                 val appInsert = AppInfoEntity(packageName = it.packageName,
+                         genreType = APP_CONFIG, genreName = "Other")
+                 appInfoDao.insertAll(appInsert)
+                 list.add(appInsert)
+             }
+         }.apply {
+             appInfoDao.insertAll(*list.toTypedArray())
+             sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
+             doneGetData.postValue(true)
+         }*/
     }
 
     private fun getInstalledApps(): Set<PackageInfo> {
@@ -182,8 +230,6 @@ class PostListViewModel @ViewModelInject constructor(
         }
         return filteredPackages
     }
-
-    fun reloadData(reload : Boolean) = _doneGetData.postValue(reload)
 
     data class AppInfoDataItem(val appInfoEntity: AppInfoEntity, val packageInfo: PackageInfo)
 }

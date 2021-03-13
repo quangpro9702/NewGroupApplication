@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DiffUtil
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_category.view.*
@@ -34,7 +35,7 @@ class CategoryAdapter(
     override fun createView(parent: ViewGroup, viewType: Int?): View {
         val view = parent.inflate(R.layout.item_category)
         val lp = view.layoutParams
-        lp.height = parent.measuredHeight / 3
+        lp.height = parent.measuredWidth / 2
         view.layoutParams = lp
         return view
     }
@@ -130,7 +131,7 @@ class CategoryAdapter(
                     Glide
                             .with(view)
                             .load(itemApp.packageInfo.applicationInfo.loadIcon(packageManager))
-                            .centerInside()
+                            .fitCenter()
                             .circleCrop()
                             .into(view.imgThirdd)
                 }

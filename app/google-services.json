@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "897513767867",
+    "project_id": "app-group-f6868",
+    "storage_bucket": "app-group-f6868.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897513767867:android:cc8f06719981967b3c7a9e",
+        "android_client_info": {
+          "package_name": "todo.quang.appgroup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "897513767867-ko8kmm50p9sr4go8k93ghk75ibuglihq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ3ZnRdurEaGeqKhhUHUB5yEzj9zc8VjQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897513767867-ko8kmm50p9sr4go8k93ghk75ibuglihq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
