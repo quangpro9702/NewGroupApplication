@@ -42,7 +42,7 @@ class GameListFragment : Fragment() {
     }
 
     private fun setupView() {
-        tvTitleGame.text = requireContext().getText(R.string.game_title)
+//        tvTitleGame.text = requireContext().getText(R.string.game_title)
 
         binding = FragmentGameListBinding.bind(requireView())
         binding.postList.setHasFixedSize(true)

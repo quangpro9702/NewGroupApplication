@@ -12,4 +12,7 @@ interface AppInfoDao {
 
     @Query("SELECT * FROM AppInfoEntity  where packageName=:packageName")
     fun findAppByPackageNameData(packageName: String): AppInfoEntity?
+
+    @Query("SELECT * FROM AppInfoEntity where genreName=:groupName")
+    fun findListAppByGroupName(groupName : String) : List<AppInfoEntity>
 }

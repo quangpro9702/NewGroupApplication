@@ -13,4 +13,9 @@
     <string name="game_title">Trò chơi</string>
     <string name="waiting_sync">Lần đồng bộ đầu tiên có thể kéo dài tới 1 phút</string>
     <string name="required_network">Đồng bộ data yêu cầu kết nối mạng</string>
+    <string name="action_reload">Tải lại</string>
+    <string name="notify_reload">Bạn chỉ nên tải lại dữ liệu khi có một số ứng dụng được sắp xếp không hợp lý, chúng tôi sẽ sớm ra mắt tính năng tuỳ biến theo sở thích của bạn</string>
+    <string name="notify_title">Thông báo</string>
+    <string name="cancel_action">Huỷ</string>
+    <string name="accept_action">Đồng ý</string>
 </resources>

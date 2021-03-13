@@ -9,3 +9,4 @@ const val FIRST_LOGIN = "FIRST_LOGIN"
 
 const val APP_CONFIG = "app"
 const val GAME_CONFIG = "game"
+const val PACKAGE_OTHER = "Other"

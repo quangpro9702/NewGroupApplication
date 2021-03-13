@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.activity_post_list.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.ActivityPostListBinding
 import todo.quang.mvvm.ui.post.activity.search.SearchListActivity
@@ -36,21 +37,6 @@ class PostListActivity : FragmentActivity() {
         setOnClickListener()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return super.onOptionsItemSelected(item)
-        when (item.itemId) {
-            R.id.reload -> {
-                showAlertDeleteDialog(getString(R.string.notify_reload)) {
-                    viewModel.reloadData(true)
-                }
-            }
-        }
-    }
-
     private fun showAlertDeleteDialog(message: String, block: () -> Unit) {
         MaterialAlertDialogBuilder(this)
                 .setTitle(resources.getString(R.string.notify_title))
@@ -70,6 +56,20 @@ class PostListActivity : FragmentActivity() {
         binding.btnSearch.setOnClickListener {
             val intent = Intent(this, SearchListActivity::class.java)
             startActivity(intent)
+        }
+
+        bottomAppBar.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.reload -> {
+                    showAlertDeleteDialog(getString(R.string.notify_reload)) {
+                        viewModel.reloadData()
+                    }
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
         }
     }
 }

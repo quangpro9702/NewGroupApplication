@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class AppInfoEntity(
         @PrimaryKey
-        var id: Long = System.currentTimeMillis(),
+        var id: String,
         var name: String = "",
         var packageName: String,
         var genreName: String = "",

@@ -20,10 +20,7 @@ import todo.quang.mvvm.model.AppInfoDao
 import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.network.PostApi
 import todo.quang.mvvm.ui.post.ExceptionBus
-import todo.quang.mvvm.utils.APP_CONFIG
-import todo.quang.mvvm.utils.FIRST_LOGIN
-import todo.quang.mvvm.utils.GAME_CONFIG
-import todo.quang.mvvm.utils.SHARED_NAME
+import todo.quang.mvvm.utils.*
 import todo.quang.mvvm.utils.exception.KvException
 import todo.quang.mvvm.utils.exception.isNetworkAvailable
 import todo.quang.mvvm.utils.extension.postValue
@@ -45,7 +42,7 @@ class PostListViewModel @ViewModelInject constructor(
 
     val loadingProgressBar: LiveData<RetrieveDataState<Boolean>> = MutableLiveData()
 
-    private val doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
+    private val _doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
             if (context.isNetworkAvailable()) {
@@ -58,7 +55,7 @@ class PostListViewModel @ViewModelInject constructor(
         }
     }
 
-    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
+    private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = _doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
         getInstalledApps().forEach {
             appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
@@ -70,14 +67,14 @@ class PostListViewModel @ViewModelInject constructor(
                     response.data.takeIf { data ->
                         data.size > 1
                     }?.let { data ->
-                        val appInsert = AppInfoEntity(packageName = it.packageName,
+                        val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
                                 genreType = response.genre, genreName = data[1])
                         appInfoDao.insertAll(appInsert)
                         list.add(AppInfoDataItem(appInsert, it))
                     }
                 } ?: apply {
-                    val appInsert = AppInfoEntity(packageName = it.packageName,
-                            genreType = APP_CONFIG, genreName = "Other")
+                    val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                            genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, it))
                 }
@@ -152,7 +149,7 @@ class PostListViewModel @ViewModelInject constructor(
         }
     }
 
-    private suspend fun loadPosts() = viewModelScope.launch {
+    private suspend fun loadPosts() {
         val list: ArrayList<AppInfoEntity> = arrayListOf()
         getInstalledApps().chunked(20).forEach {
             withContext(Dispatchers.IO) {
@@ -164,14 +161,13 @@ class PostListViewModel @ViewModelInject constructor(
                             response.data.takeIf { data ->
                                 data.size > 1
                             }?.let { data ->
-                                list.add(AppInfoEntity(packageName = it.packageName,
+                                list.add(AppInfoEntity(id = it.packageName, packageName = it.packageName,
                                         genreType = response.genre, genreName = data[1]))
                             }
                         }
                     } ?: apply {
-                        val appInsert = AppInfoEntity(packageName = it.packageName,
-                                genreType = APP_CONFIG, genreName = "Other")
-                        appInfoDao.insertAll(appInsert)
+                        val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
                         list.add(appInsert)
                     }
                 }
@@ -179,7 +175,7 @@ class PostListViewModel @ViewModelInject constructor(
         }.apply {
             appInfoDao.insertAll(*list.toTypedArray())
             sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
-            doneGetData.postValue(true)
+            _doneGetData.postValue(true)
         }
         /* getInstalledApps().chunked(30).forEach {
              kotlin.runCatching {
@@ -204,6 +200,41 @@ class PostListViewModel @ViewModelInject constructor(
              sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
              doneGetData.postValue(true)
          }*/
+    }
+
+    fun reloadData() = viewModelScope.launch(Dispatchers.IO + handler) {
+        val list: ArrayList<AppInfoEntity> = arrayListOf()
+        loadingProgressBar.postValue(RetrieveDataState.Start)
+        if (context.isNetworkAvailable()) {
+            val listApp = appInfoDao.findListAppByGroupName(PACKAGE_OTHER)
+            listApp.chunked(20).forEach {
+                withContext(coroutineContext) {
+                    it.forEach {
+                        kotlin.runCatching {
+                            postApi.getGenre(it.packageName, locale)
+                        }.getOrNull()?.let { response ->
+                            response.body()?.let { response ->
+                                response.data.takeIf { data ->
+                                    data.size > 1
+                                }?.let { data ->
+                                    list.add(AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                            genreType = response.genre, genreName = data[1]))
+                                }
+                            }
+                        } ?: apply {
+                            val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                    genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
+                            list.add(appInsert)
+                        }
+                    }
+                }
+            }.apply {
+                appInfoDao.insertAll(*list.toTypedArray())
+                _doneGetData.postValue(true)
+            }
+        } else {
+            loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
+        }
     }
 
     private fun getInstalledApps(): Set<PackageInfo> {

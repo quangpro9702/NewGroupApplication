@@ -12,4 +12,9 @@
 	<string name="game_title">Game List</string>
 	<string name="waiting_sync">The first synchronization can take up to 1 minute</string>
 	<string name="required_network">Data synchronization requires network connection</string>
+	<string name="action_reload">Reload</string>
+	<string name="notify_reload">You should only reload data when there are some unreasonable apps, we will be rolling out customization soon.</string>
+	<string name="notify_title">Notification</string>
+	<string name="cancel_action">Cancel</string>
+	<string name="accept_action">Okay</string>
 </resources>
