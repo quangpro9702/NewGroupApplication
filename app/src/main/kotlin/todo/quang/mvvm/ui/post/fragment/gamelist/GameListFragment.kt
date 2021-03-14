@@ -15,6 +15,8 @@ import todo.quang.mvvm.databinding.FragmentGameListBinding
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.adapter.CategoryAdapter
 import todo.quang.mvvm.ui.post.fragment.dialoglist.DialogListAppFragment
+import todo.quang.mvvm.utils.extension.gone
+import todo.quang.mvvm.utils.extension.visible
 
 @AndroidEntryPoint
 class GameListFragment : Fragment() {
@@ -61,7 +63,15 @@ class GameListFragment : Fragment() {
 
     private fun setupObserve() {
         viewModelShare.groupGameInfoDataItem.observe(viewLifecycleOwner, {
-            categoryAdapter.submitList(it)
+            when (it.isNotEmpty()) {
+                true -> {
+                    layoutEmpty.gone()
+                    categoryAdapter.submitList(it)
+                }
+                else -> {
+                    layoutEmpty.visible()
+                }
+            }
         })
     }
 

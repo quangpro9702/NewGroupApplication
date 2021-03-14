@@ -1,6 +1,7 @@
 package todo.quang.mvvm.ui.post.fragment.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,18 +11,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import dagger.hilt.android.AndroidEntryPoint
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.FragmentCategoryHomeBinding
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.fragment.applist.AppListFragment
 import todo.quang.mvvm.ui.post.fragment.gamelist.GameListFragment
+import todo.quang.mvvm.utils.extension.postValue
 
 @AndroidEntryPoint
 class HomeCategoryFragment : Fragment() {
     private lateinit var binding: FragmentCategoryHomeBinding
 
-    private val viewModel: PostListViewModel by activityViewModels()
+    private val viewModelShared: PostListViewModel by activityViewModels()
 
     lateinit var onBackPressedDispatcher : OnBackPressedCallback
 
@@ -53,6 +56,7 @@ class HomeCategoryFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         onBackPressedDispatcher.remove()
+        //TODO remove onPageChangePager
     }
 
     private fun setView() {
@@ -61,6 +65,12 @@ class HomeCategoryFragment : Fragment() {
     }
 
     private fun setOnClickListener() {
+        binding.pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                viewModelShared.positionPageChangeLiveData.postValue(position)
+            }
+        })
     }
 
     private inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {

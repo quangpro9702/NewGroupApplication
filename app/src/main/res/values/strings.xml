@@ -20,4 +20,5 @@
     <string name="accept_action">Đồng ý</string>
     <string name="loading_info">Đang lấy thông tin của: %s \n Yêu cầu kết nối mạng ổn định</string>
     <string name="click_failure_message">Đang trong quá trình đồng bộ dữ liệu, bạn thông thể thực hiên thao tác</string>
+    <string name="empty_message">Chưa có dữ liệu, vui lòng kiểm tra lại</string>
 </resources>

@@ -6,21 +6,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.transition.MaterialContainerTransform
 import dagger.hilt.android.AndroidEntryPoint
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.FragmentDialogListAppBinding
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.adapter.ListAppAdapter
-import todo.quang.mvvm.utils.extension.themeColor
 
 @AndroidEntryPoint
 class DialogListAppFragment : DialogFragment() {
     private val viewModelShare: PostListViewModel by activityViewModels()
+    private val viewModel: DialogListAppViewModel by viewModels()
     private lateinit var binding: FragmentDialogListAppBinding
     private lateinit var listAppAdapter: ListAppAdapter
 
@@ -41,12 +40,6 @@ class DialogListAppFragment : DialogFragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        /*sharedElementEnterTransition = MaterialContainerTransform().apply {
-            drawingViewId = R.id.nav_host_fragment
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            scrimColor = Color.TRANSPARENT
-            setAllContainerColors(requireContext().themeColor(R.attr.colorSurface))
-        }*/
         return inflater.inflate(R.layout.fragment_dialog_list_app, container, false)
     }
 
@@ -70,7 +63,8 @@ class DialogListAppFragment : DialogFragment() {
         binding.recyclerList.layoutManager = GridLayoutManager(requireActivity(), 4)
 
         listAppAdapter = ListAppAdapter(requireActivity().packageManager) {
-            openApp(it)
+            viewModel.updateAppChangeRecentInfo(it)
+            openApp(it.packageName)
         }.apply {
             binding.recyclerList.adapter = this
         }

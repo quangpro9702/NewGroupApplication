@@ -8,11 +8,12 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_app.view.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.BaseAdapter
+import todo.quang.mvvm.model.AppInfoEntity
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.utils.extension.inflate
 
 class ListAppAdapter(private val packageManager: PackageManager,
-                     private val openApp: (namePackage: String) -> Unit) : BaseAdapter<PostListViewModel.AppInfoDataItem>(object : DiffUtil.ItemCallback<PostListViewModel.AppInfoDataItem>() {
+                     private val openApp: (appInfoEntity: AppInfoEntity) -> Unit) : BaseAdapter<PostListViewModel.AppInfoDataItem>(object : DiffUtil.ItemCallback<PostListViewModel.AppInfoDataItem>() {
     override fun areItemsTheSame(oldItem: PostListViewModel.AppInfoDataItem, newItem: PostListViewModel.AppInfoDataItem): Boolean {
         return false
     }
@@ -37,7 +38,7 @@ class ListAppAdapter(private val packageManager: PackageManager,
                 .into(view.imgIcon)
         view.tvName.text = item.packageInfo.applicationInfo.loadLabel(packageManager).toString()
         view.rootView.setOnClickListener {
-            openApp.invoke(item.packageInfo.packageName)
+            openApp.invoke(item.appInfoEntity)
         }
     }
 }

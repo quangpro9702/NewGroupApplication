@@ -43,6 +43,8 @@ class PostListViewModel @ViewModelInject constructor(
 
     val loadingTextShow: LiveData<String> = MutableLiveData()
 
+    val positionPageChangeLiveData : LiveData<Int> = MutableLiveData()
+
     private val _doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
@@ -58,28 +60,28 @@ class PostListViewModel @ViewModelInject constructor(
 
     private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = _doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
-        getInstalledApps().forEach {
-            appInfoDao.findAppByPackageNameData(it.packageName)?.apply {
-                list.add(AppInfoDataItem(this, it))
+        getInstalledApps().forEach { packageInfo ->
+            appInfoDao.findAppByPackageNameData(packageInfo.packageName)?.apply {
+                list.add(AppInfoDataItem(this, packageInfo))
             } ?: apply {
                 kotlin.runCatching {
-                    postApi.getGenre(it.packageName, locale)
+                    postApi.getGenre(packageInfo.packageName, locale)
                 }.getOrNull()?.let { app ->
                     app.body()?.let { response ->
                         response.data.takeIf { data ->
                             data.size > 1
                         }?.let { data ->
-                            val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                            val appInsert = AppInfoEntity(id = packageInfo.packageName, packageName = packageInfo.packageName,
                                     genreType = response.genre, genreName = data[1])
                             appInfoDao.insertAll(appInsert)
-                            list.add(AppInfoDataItem(appInsert, it))
+                            list.add(AppInfoDataItem(appInsert, packageInfo))
                         }
                     }
                 } ?: apply {
-                    val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                    val appInsert = AppInfoEntity(id = packageInfo.packageName, packageName = packageInfo.packageName,
                             genreType = APP_CONFIG, genreName = todo.quang.mvvm.utils.PACKAGE_OTHER)
                     appInfoDao.insertAll(appInsert)
-                    list.add(AppInfoDataItem(appInsert, it))
+                    list.add(AppInfoDataItem(appInsert, packageInfo))
                 }
             }
         }
@@ -217,6 +219,8 @@ class PostListViewModel @ViewModelInject constructor(
             loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
         }
     }
+
+    fun reloadData(getData : Boolean) = _doneGetData.postValue(getData)
 
     private fun getInstalledApps(): Set<PackageInfo> {
         val packageManager: PackageManager = context.packageManager

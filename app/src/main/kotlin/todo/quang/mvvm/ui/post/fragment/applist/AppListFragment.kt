@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.main.layout_loading.view.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.databinding.FragmentAppListBinding
+import todo.quang.mvvm.ui.post.activity.home.PostListActivity
 import todo.quang.mvvm.ui.post.activity.home.PostListViewModel
 import todo.quang.mvvm.ui.post.adapter.CategoryAdapter
 import todo.quang.mvvm.ui.post.fragment.dialoglist.DialogListAppFragment
@@ -34,8 +35,6 @@ class AppListFragment : Fragment() {
 
     private lateinit var materialAlertDialogBuilder: MaterialAlertDialogBuilder
 
-    private lateinit var customAlertDialogView: View
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
             inflater.inflate(R.layout.fragment_app_list, container, false)
 
@@ -47,7 +46,6 @@ class AppListFragment : Fragment() {
     }
 
     private fun setupUI() {
-        tvTitle.text = requireContext().getText(R.string.application_title)
         materialAlertDialogBuilder = MaterialAlertDialogBuilder(requireContext())
 
         binding.postList.setHasFixedSize(true)
@@ -58,15 +56,6 @@ class AppListFragment : Fragment() {
             viewModel.updateAppChangeRecentInfo(app)
             openApp(packageName)
         }, {
-            /*  val emailCardDetailTransitionName = getString(R.string.transition_to_detail)
-              val extras = FragmentNavigatorExtras(view to emailCardDetailTransitionName)
-              navigate(HomeFragmentDirections.actionFirstFragmentToSecondFragment(id, title), null, extras)
-              exitTransition = MaterialElevationScale(false).apply {
-                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-              }
-              reenterTransition = MaterialElevationScale(true).apply {
-                  duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-              }*/
             DialogListAppFragment.newInstance(it).show(childFragmentManager, "TAG")
         }).apply {
             binding.postList.adapter = this

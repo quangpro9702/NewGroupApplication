@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppInfoDao {
@@ -12,6 +13,9 @@ interface AppInfoDao {
 
     @Query("SELECT * FROM AppInfoEntity  where packageName=:packageName")
     fun findAppByPackageNameData(packageName: String): AppInfoEntity?
+
+    @Query("SELECT * FROM AppInfoEntity  where packageName=:packageName")
+    fun findAppByPackageNameDataa(packageName: String): Flow<AppInfoEntity?>
 
     @Query("SELECT * FROM AppInfoEntity where genreName=:groupName")
     fun findListAppByGroupName(groupName : String) : List<AppInfoEntity>

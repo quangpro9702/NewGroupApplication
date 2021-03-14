@@ -19,4 +19,5 @@
 	<string name="accept_action">Okay</string>
 	<string name="loading_info">Loading info: %s</string>
 	<string name="click_failure_message">In the process of synchronizing data, you can not perform the operation</string>
+	<string name="empty_message">No data, please check again</string>
 </resources>

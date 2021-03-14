@@ -1,6 +1,9 @@
 package todo.quang.mvvm.ui.post.activity.home
 
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -17,6 +20,8 @@ import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.databinding.ActivityPostListBinding
 import todo.quang.mvvm.ui.post.activity.search.SearchListActivity
 import todo.quang.mvvm.ui.post.fragment.home.HomeCategoryFragment
+import todo.quang.mvvm.utils.FIRST_LOGIN
+import todo.quang.mvvm.utils.SHARED_NAME
 
 
 @AndroidEntryPoint
@@ -28,6 +33,7 @@ class PostListActivity : FragmentActivity() {
 
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +52,14 @@ class PostListActivity : FragmentActivity() {
         setOnClickListener()
     }
 
+    override fun onResume() {
+        super.onResume()
+        sharedPreferences = this.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
+        if (sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+            viewModel.reloadData(true)
+        }
+    }
+
     private fun showAlertDeleteDialog(message: String, block: () -> Unit) {
         MaterialAlertDialogBuilder(this)
                 .setTitle(resources.getString(R.string.notify_title))
@@ -55,7 +69,10 @@ class PostListActivity : FragmentActivity() {
                 .setPositiveButton(resources.getString(R.string.accept_action)) { _, _ ->
                     block.invoke()
                 }
-                .show()
+                .show().apply {
+                    this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
+                    this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
+                }
     }
 
     private fun setView() {
@@ -64,9 +81,9 @@ class PostListActivity : FragmentActivity() {
     private fun setOnClickListener() {
         binding.btnSearch.setOnClickListener {
             if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
-            val intent = Intent(this, SearchListActivity::class.java)
-            startActivity(intent)
-            }else{
+                val intent = Intent(this, SearchListActivity::class.java)
+                startActivity(intent)
+            } else {
                 Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
             }
         }
@@ -91,5 +108,19 @@ class PostListActivity : FragmentActivity() {
     }
 
     private fun observeData() {
+        viewModel.positionPageChangeLiveData.observe(this, {
+            when (it) {
+                0 -> {
+                    appTitle.text = getString(R.string.application_title)
+                }
+                1 -> {
+                    appTitle.text = getString(R.string.game_title)
+                }
+                else -> {
+                    appTitle.text = getString(R.string.application_title)
+                }
+
+            }
+        })
     }
 }

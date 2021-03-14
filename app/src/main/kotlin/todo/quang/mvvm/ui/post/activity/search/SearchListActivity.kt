@@ -1,5 +1,7 @@
 package todo.quang.mvvm.ui.post.activity.search
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
@@ -12,6 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import todo.quang.mvvm.R
 import todo.quang.mvvm.databinding.FragmentSearchListBinding
 import todo.quang.mvvm.ui.post.adapter.SearchListAdapter
+import todo.quang.mvvm.utils.SHARED_NAME
 
 @AndroidEntryPoint
 class SearchListActivity : FragmentActivity() {

@@ -5,24 +5,24 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:background="@color/Blue_50"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/Blue_50">
 
         <FrameLayout
             android:id="@+id/nav_host_fragment"
             android:layout_width="match_parent"
-            android:paddingBottom="@dimen/_26sdp"
+            android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:layout_height="match_parent" />
+            android:paddingBottom="@dimen/_26sdp" />
 
 
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
-            android:textColor="@color/blue_700"
+            android:layout_height="wrap_content"
             android:paddingStart="@dimen/_16sdp"
             android:paddingEnd="@dimen/_16sdp"
-            android:layout_height="wrap_content"
+            android:textColor="@color/blue_700"
             android:textSize="30sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -33,8 +33,22 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             app:hideOnScroll="true"
-            app:menu="@menu/bottom_app_bar"
-            app:navigationIcon="@drawable/ic_menu" />
+            app:menu="@menu/bottom_app_bar">
+<!--            app:navigationIcon="@drawable/ic_menu"-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/appTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/application_title"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:textColor="@color/blue_800" />
+
+            </LinearLayout>
+        </com.google.android.material.bottomappbar.BottomAppBar>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnSearch"
