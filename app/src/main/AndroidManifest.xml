@@ -26,18 +26,5 @@
         <activity
             android:name=".ui.post.activity.search.SearchListActivity"
             android:launchMode="singleTask" />
-
-       <!-- <receiver android:name=".ui.post.widget.HomeScreenWidget">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_home_screen" />
-        </receiver>-->
-
-       <!-- <service
-            android:name=".ui.post.widget.RemoteViewsServiceWidget"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />-->
     </application>
 </manifest>
