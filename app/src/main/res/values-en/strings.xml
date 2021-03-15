@@ -20,5 +20,6 @@
     <string name="loading_info">Loading info: %s</string>
     <string name="click_failure_message">In the process of synchronizing data, you can not perform the operation</string>
     <string name="empty_message">No data, please check again</string>
-    <string name="request_permission_get_genre">Do you agree to allow us to access the system to retrieve information about all installed application on the device for retrieving category information of the application?</string>
+    <string name="request_permission_get_genre">Do you agree to allow us to access the system to retrieve list of all Installed Application on the device for retrieving category information of the application?</string>
+    <string name="request_permission_failure_notify">You have not agreed to get information from the list of apps installed on the device</string>
 </resources>

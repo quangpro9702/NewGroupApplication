@@ -48,18 +48,20 @@ class PostListViewModel @ViewModelInject constructor(
 
     val positionPageChangeLiveData: LiveData<Int> = MutableLiveData()
 
-    private val requestPermissionInstallApps: LiveData<Boolean> = MutableLiveData()
+    val requestPermissionInstallApps: LiveData<Boolean> = MutableLiveData()
 
     private val _doneGetData: LiveData<Boolean> = requestPermissionInstallApps.switchMapLiveData {
-        loadingProgressBar.postValue(RetrieveDataState.Start)
-        if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
-            if (context.isNetworkAvailable()) {
-                loadPosts()
+        if(it){
+            loadingProgressBar.postValue(RetrieveDataState.Start)
+            if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+                if (context.isNetworkAvailable()) {
+                    loadPosts()
+                } else {
+                    loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
+                }
             } else {
-                loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
+                emit(true)
             }
-        } else {
-            emit(true)
         }
     }
 

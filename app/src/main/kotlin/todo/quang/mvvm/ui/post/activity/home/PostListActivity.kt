@@ -22,6 +22,7 @@ import todo.quang.mvvm.ui.post.activity.search.SearchListActivity
 import todo.quang.mvvm.ui.post.fragment.home.HomeCategoryFragment
 import todo.quang.mvvm.utils.FIRST_LOGIN
 import todo.quang.mvvm.utils.SHARED_NAME
+import todo.quang.mvvm.utils.extension.postValue
 
 
 @AndroidEntryPoint
@@ -74,14 +75,12 @@ class PostListActivity : FragmentActivity() {
                 }
     }
 
-    private fun showAlertRequestPermissionDialog(message: String, block: () -> Unit) {
+    private fun showAlertRequestPermissionDialog(message: String, blockPositive: () -> Unit) {
         MaterialAlertDialogBuilder(this)
                 .setTitle(resources.getString(R.string.notify_title))
                 .setMessage(message)
-                .setNegativeButton(resources.getString(R.string.cancel_action)) { _, _ ->
-                }
                 .setPositiveButton(resources.getString(R.string.accept_action)) { _, _ ->
-                    block.invoke()
+                    blockPositive.invoke()
                 }
                 .show().apply {
                     this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
@@ -91,31 +90,39 @@ class PostListActivity : FragmentActivity() {
 
     private fun setView() {
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
-            showAlertRequestPermissionDialog(getString(R.string.request_permission_get_genre)) {
-
-            }
+            showAlertRequestPermissionDialog(getString(R.string.request_permission_get_genre), blockPositive = {
+                viewModel.requestPermissionInstallApps.postValue(true)
+            })
         }
     }
 
     private fun setOnClickListener() {
         binding.btnSearch.setOnClickListener {
-            if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
-                val intent = Intent(this, SearchListActivity::class.java)
-                startActivity(intent)
+            if (sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+                if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
+                    val intent = Intent(this, SearchListActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.request_permission_failure_notify), Toast.LENGTH_SHORT).show()
             }
         }
 
         bottomAppBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.reload -> {
-                    if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
-                        showAlertDeleteDialog(getString(R.string.notify_reload)) {
-                            viewModel.reloadData()
+                    if (sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+                        if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
+                            showAlertDeleteDialog(getString(R.string.notify_reload)) {
+                                viewModel.reloadData()
+                            }
+                        } else {
+                            Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.request_permission_failure_notify), Toast.LENGTH_SHORT).show()
                     }
                     true
                 }
