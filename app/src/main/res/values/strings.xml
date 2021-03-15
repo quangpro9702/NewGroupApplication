@@ -21,4 +21,5 @@
     <string name="loading_info">Đang lấy thông tin của: %s \n Yêu cầu kết nối mạng ổn định</string>
     <string name="click_failure_message">Đang trong quá trình đồng bộ dữ liệu, bạn thông thể thực hiên thao tác</string>
     <string name="empty_message">Chưa có dữ liệu, vui lòng kiểm tra lại</string>
+    <string name="request_permission_get_genre">Bạn có đồng ý cho phép chúng tôi truy cập vào hệ thống để lấy ra thông tin tất cả các ứng dụng được cài đặt trên thiết bị phục vụ cho việc lấy thông tin thể loại của ứng dụng?</string>
 </resources>

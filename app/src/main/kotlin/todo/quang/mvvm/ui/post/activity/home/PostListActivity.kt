@@ -46,7 +46,7 @@ class PostListActivity : FragmentActivity() {
                 .addToBackStack("")
                 .commitAllowingStateLoss()
         // Obtain the FirebaseAnalytics instance.
-
+        sharedPreferences = this.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
         setView()
         observeData()
         setOnClickListener()
@@ -54,7 +54,6 @@ class PostListActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        sharedPreferences = this.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
         if (sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
             viewModel.reloadData(true)
         }
@@ -75,7 +74,27 @@ class PostListActivity : FragmentActivity() {
                 }
     }
 
+    private fun showAlertRequestPermissionDialog(message: String, block: () -> Unit) {
+        MaterialAlertDialogBuilder(this)
+                .setTitle(resources.getString(R.string.notify_title))
+                .setMessage(message)
+                .setNegativeButton(resources.getString(R.string.cancel_action)) { _, _ ->
+                }
+                .setPositiveButton(resources.getString(R.string.accept_action)) { _, _ ->
+                    block.invoke()
+                }
+                .show().apply {
+                    this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
+                    this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
+                }
+    }
+
     private fun setView() {
+        if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+            showAlertRequestPermissionDialog(getString(R.string.request_permission_get_genre)) {
+
+            }
+        }
     }
 
     private fun setOnClickListener() {

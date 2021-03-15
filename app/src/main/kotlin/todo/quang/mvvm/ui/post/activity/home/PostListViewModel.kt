@@ -7,7 +7,10 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,9 +46,11 @@ class PostListViewModel @ViewModelInject constructor(
 
     val loadingTextShow: LiveData<String> = MutableLiveData()
 
-    val positionPageChangeLiveData : LiveData<Int> = MutableLiveData()
+    val positionPageChangeLiveData: LiveData<Int> = MutableLiveData()
 
-    private val _doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO + handler) {
+    private val requestPermissionInstallApps: LiveData<Boolean> = MutableLiveData()
+
+    private val _doneGetData: LiveData<Boolean> = requestPermissionInstallApps.switchMapLiveData {
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
             if (context.isNetworkAvailable()) {
@@ -220,7 +225,7 @@ class PostListViewModel @ViewModelInject constructor(
         }
     }
 
-    fun reloadData(getData : Boolean) = _doneGetData.postValue(getData)
+    fun reloadData(getData: Boolean) = _doneGetData.postValue(getData)
 
     private fun getInstalledApps(): Set<PackageInfo> {
         val packageManager: PackageManager = context.packageManager
