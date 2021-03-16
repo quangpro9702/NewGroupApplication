@@ -46,6 +46,8 @@
 -keep public class * extends android.app.backup.BackupAgentHelper
 -keep public class * extends android.preference.Preference
 -keep public class * extends android.animation.ValueAnimator
+-keep public class * extends androidx.lifecycle.AndroidViewModel
+-keep public class * extends androidx.lifecycle.ViewModel
 
 -keepclassmembers class * implements java.io.Serializable {
     static final long serialVersionUID;
@@ -96,3 +98,6 @@ public void *(android.view.View);
    void set*(***);
    *** get*();
 }
+
+-keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.ViewModel
+-keepnames @dagger.hilt.android.lifecycle.HiltViewModel class * extends androidx.lifecycle.AndroidViewModel

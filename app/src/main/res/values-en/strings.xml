@@ -16,7 +16,7 @@
     <string name="notify_reload">You should only reload data when there are some unreasonable apps, we will be rolling out customization soon.</string>
     <string name="notify_title">Notification</string>
     <string name="cancel_action">Cancel</string>
-    <string name="accept_action">Okay</string>
+    <string name="accept_action">Agree</string>
     <string name="loading_info">Loading info: %s</string>
     <string name="click_failure_message">In the process of synchronizing data, you can not perform the operation</string>
     <string name="empty_message">No data, please check again</string>

@@ -30,7 +30,6 @@ import java.util.*
 import kotlin.collections.HashSet
 import kotlin.coroutines.CoroutineContext
 
-
 class PostListViewModel @ViewModelInject constructor(
         application: Application, private val appInfoDao: AppInfoDao, private val postApi: PostApi) : AndroidViewModel(application) {
     private val context = getApplication<Application>().applicationContext
@@ -51,7 +50,7 @@ class PostListViewModel @ViewModelInject constructor(
     val requestPermissionInstallApps: LiveData<Boolean> = MutableLiveData()
 
     private val _doneGetData: LiveData<Boolean> = requestPermissionInstallApps.switchMapLiveData {
-        if(it){
+        if (it) {
             loadingProgressBar.postValue(RetrieveDataState.Start)
             if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
                 if (context.isNetworkAvailable()) {
