@@ -18,8 +18,8 @@ android {
         applicationId "todo.quang.appgroup"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 2
-        versionName "1.2"
+        versionCode 6
+        versionName "1.6"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         multiDexEnabled true
         kapt {
@@ -37,7 +37,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

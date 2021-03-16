@@ -21,6 +21,8 @@
     <string name="loading_info">Đang lấy thông tin của: %s \n Yêu cầu kết nối mạng ổn định</string>
     <string name="click_failure_message">Đang trong quá trình đồng bộ dữ liệu, bạn thông thể thực hiên thao tác</string>
     <string name="empty_message">Chưa có dữ liệu, vui lòng kiểm tra lại</string>
-    <string name="request_permission_get_genre">Chúng tôi cần truy cập vào hệ thống để lấy ra danh sách tất cả các Ứng dụng được cài đặt trên thiết bị phục vụ cho việc lấy thông tin thể loại của ứng dụng</string>
+    <string name="request_permission_get_genre">Group App sẽ có thể lấy tất cả các Installed Application trên thiết bị, nó có thể bao gồm thông tin của ứng dụng cũng như tên ứng dụng và packagename. Nó sẽ phục vụ cho việc Group App lấy thông tin nhóm và thể loại của ứng dụng có liên quan để sắp xếp lại danh sách ứng dụng và hiển thị trên màn hình &lt;br> ●&lt;b> Get Installed Application permission&lt;/b> &lt;\br> Dùng để lấy danh sách tất cả các ứng dụng trên thiết bị phục vụ cho việc hiển thị và phân chia nhóm ứng dụng sau đó hiển thị lại lên màn hình</string>
     <string name="request_permission_failure_notify">Bạn chưa đồng ý lấy thông tin danh sách ứng dụng được cài đặt trên thiết bị</string>
+    <string name="request_permission_failure_notify_reaction">●&lt;b> Get Installed Application permission&lt;/b>&lt;br> Dùng để lấy danh sách tất cả các ứng dụng trên thiết bị phục vụ cho việc hiển thị và phân chia nhóm ứng dụng sau đó hiển thị lại lên màn hình</string>
+    <string name="app_title_permission">Group App cần quyền truy cập</string>
 </resources>

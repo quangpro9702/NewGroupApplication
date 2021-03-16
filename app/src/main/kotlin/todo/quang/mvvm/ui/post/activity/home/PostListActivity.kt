@@ -4,9 +4,12 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Html
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.text.HtmlCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -21,6 +24,7 @@ import todo.quang.mvvm.databinding.ActivityPostListBinding
 import todo.quang.mvvm.ui.post.activity.search.SearchListActivity
 import todo.quang.mvvm.ui.post.fragment.home.HomeCategoryFragment
 import todo.quang.mvvm.utils.FIRST_LOGIN
+import todo.quang.mvvm.utils.PERMISSION_ACCEPT_INSTALL_APP
 import todo.quang.mvvm.utils.SHARED_NAME
 import todo.quang.mvvm.utils.extension.postValue
 
@@ -48,9 +52,10 @@ class PostListActivity : FragmentActivity() {
                 .commitAllowingStateLoss()
         // Obtain the FirebaseAnalytics instance.
         sharedPreferences = this.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
-        setView()
+        showPermission(getString(R.string.request_permission_get_genre))
         observeData()
         setOnClickListener()
+
     }
 
     override fun onResume() {
@@ -70,6 +75,7 @@ class PostListActivity : FragmentActivity() {
                     block.invoke()
                 }
                 .show().apply {
+                    this.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#5b5b5b"))
                     this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
                     this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
                 }
@@ -77,28 +83,32 @@ class PostListActivity : FragmentActivity() {
 
     private fun showAlertRequestPermissionDialog(message: String, blockPositive: () -> Unit) {
         MaterialAlertDialogBuilder(this)
-                .setTitle(resources.getString(R.string.notify_title))
-                .setMessage(message)
+                .setTitle(resources.getString(R.string.app_title_permission))
+                .setMessage(Html.fromHtml(message))
+                .setNegativeButton(resources.getString(R.string.cancel_action)) { _, _ ->
+                }
                 .setPositiveButton(resources.getString(R.string.accept_action)) { _, _ ->
                     blockPositive.invoke()
                 }
                 .show().apply {
+                    this.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#5b5b5b"))
                     this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
                     this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
                 }
     }
 
-    private fun setView() {
-        if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
-            showAlertRequestPermissionDialog(getString(R.string.request_permission_get_genre), blockPositive = {
+    private fun showPermission(message: String) {
+        if (!sharedPreferences.getBoolean(PERMISSION_ACCEPT_INSTALL_APP, false)) {
+            showAlertRequestPermissionDialog(message, blockPositive = {
                 viewModel.requestPermissionInstallApps.postValue(true)
+                sharedPreferences.edit().putBoolean(PERMISSION_ACCEPT_INSTALL_APP, true).apply()
             })
         }
     }
 
     private fun setOnClickListener() {
         binding.btnSearch.setOnClickListener {
-            if (sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+            if (sharedPreferences.getBoolean(PERMISSION_ACCEPT_INSTALL_APP, false)) {
                 if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
                     val intent = Intent(this, SearchListActivity::class.java)
                     startActivity(intent)
@@ -106,14 +116,14 @@ class PostListActivity : FragmentActivity() {
                     Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
                 }
             } else {
-                Toast.makeText(this, getString(R.string.request_permission_failure_notify), Toast.LENGTH_SHORT).show()
+                showPermission(getString(R.string.request_permission_failure_notify_reaction))
             }
         }
 
         bottomAppBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.reload -> {
-                    if (sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+                    if (sharedPreferences.getBoolean(PERMISSION_ACCEPT_INSTALL_APP, false)) {
                         if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
                             showAlertDeleteDialog(getString(R.string.notify_reload)) {
                                 viewModel.reloadData()
@@ -122,7 +132,7 @@ class PostListActivity : FragmentActivity() {
                             Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(this, getString(R.string.request_permission_failure_notify), Toast.LENGTH_SHORT).show()
+                        showPermission(getString(R.string.request_permission_failure_notify_reaction))
                     }
                     true
                 }

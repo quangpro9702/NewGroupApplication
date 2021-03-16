@@ -1,5 +1,6 @@
 package todo.quang.mvvm.model
 
+import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -11,6 +12,8 @@ import androidx.room.PrimaryKey
  * @property title the title of the post
  * @property body the content of the post
  */
+
+@Keep
 @Entity
 data class AppInfoEntity(
         @PrimaryKey

@@ -6,6 +6,7 @@ const val BASE_URL: String = "https://herokucategory.herokuapp.com/"
 
 const val SHARED_NAME = "PREF"
 const val FIRST_LOGIN = "FIRST_LOGIN"
+const val PERMISSION_ACCEPT_INSTALL_APP = "PERMISSION_ACCEPT_INSTALL_APP"
 
 const val APP_CONFIG = "app"
 const val GAME_CONFIG = "game"
