@@ -5,11 +5,11 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.text.Html
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.core.text.HtmlCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -132,8 +132,27 @@ class PostListActivity : FragmentActivity() {
                             Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        showPermission(getString(R.string.request_permission_failure_notify_reaction))
+                        showPermission(getString(R.string.privacy_policy_link))
                     }
+                    true
+                }
+                R.id.info -> {
+                    MaterialAlertDialogBuilder(this)
+                            .setTitle(resources.getString(R.string.app_title_permission))
+                            .setMessage("${getString(R.string.privacy_policy)} \n ${getString(R.string.privacy_policy_link)}")
+                            .setNegativeButton(resources.getString(R.string.cancel_action)) { _, _ ->
+                            }
+                            .setPositiveButton(resources.getString(R.string.action_view)) { _, _ ->
+                                val url = "https://sites.google.com/view/group-app-policy/home"
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(url)
+                                startActivity(i)
+                            }
+                            .show().apply {
+                                this.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#5b5b5b"))
+                                this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
+                                this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
+                            }
                     true
                 }
                 else -> {

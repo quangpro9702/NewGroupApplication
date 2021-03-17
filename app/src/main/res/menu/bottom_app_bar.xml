@@ -1,16 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-   <!-- <item
-        android:id="@+id/search"
-        android:contentDescription="@string/content_description_search"
-        android:icon="@drawable/ic_search"
-        android:title="@string/content_description_search"
-        app:showAsAction="ifRoom" />
--->
     <item
         android:id="@+id/reload"
         android:contentDescription="@string/action_reload"
         android:title="@string/action_reload"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/info"
+        android:contentDescription="@string/privacy_policy"
+        android:icon="@drawable/ic_search"
+        android:title="@string/privacy_policy" />
 
 </menu>

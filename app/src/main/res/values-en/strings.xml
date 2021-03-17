@@ -20,8 +20,9 @@
     <string name="loading_info">Loading info: %s</string>
     <string name="click_failure_message">In the process of synchronizing data, you can not perform the operation</string>
     <string name="empty_message">No data, please check again</string>
-    <string name="request_permission_get_genre">Group App will be able to retrieve all the Installed Application on the device, it can include the app is information as well as the app name and packagename. It will serve for Group App to get group and category information of relevant application to rearrange the list of apps and show into screen. &lt;br> ●&lt;b> Get Installed Application permission&lt;/b> &lt;br> Used to get a list of all the apps on the device to display and group the apps by category, then display it on the screen.</string>
+    <string name="request_permission_get_genre">Group App will be able to retrieve all the Installed Application on the device, it can include the app is information as well as the app name and packagename. It will serve for Group App to get group and category information of relevant application to rearrange the list of apps and show into screen. &lt;br> &lt;br>●&lt;b> PRIVACY POLICY&lt;/b> &lt;br>https://sites.google.com/view/group-app-policy/home​</string>
     <string name="request_permission_failure_notify">You have not agreed to get information from the list of apps installed on the device</string>
-    <string name="request_permission_failure_notify_reaction">●&lt;b> Get Installed Application permission&lt;/b> &lt;br> Used to get a list of all the apps on the device to display and group the apps by category, then display it on the screen.</string>
+    <string name="request_permission_failure_notify_reaction">●&lt;b> Get Installed Application permission&lt;/b> &lt;br> Used to get a list of all the apps on the device to display and group the apps by category, then display it on the screen.&lt;br>● PRIVACY POLICY&lt;br>https://sites.google.com/view/group-app-policy/home​</string>
     <string name="app_title_permission">Group App needs permission</string>
+    <string name="action_view">View</string>
 </resources>
