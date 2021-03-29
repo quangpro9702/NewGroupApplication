@@ -85,7 +85,7 @@ class PostListViewModel @ViewModelInject constructor(
                     }
                 } ?: apply {
                     val appInsert = AppInfoEntity(id = packageInfo.packageName, packageName = packageInfo.packageName,
-                            genreType = APP_CONFIG, genreName = todo.quang.mvvm.utils.PACKAGE_OTHER)
+                            genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
                     appInfoDao.insertAll(appInsert)
                     list.add(AppInfoDataItem(appInsert, packageInfo))
                 }

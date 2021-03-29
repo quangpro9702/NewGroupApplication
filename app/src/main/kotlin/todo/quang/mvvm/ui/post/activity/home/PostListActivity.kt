@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil

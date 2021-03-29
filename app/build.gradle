@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "todo.quang.appgroup"
+        applicationId "todo.quang.appgroupppppp"
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 8
@@ -52,7 +52,8 @@ android {
             signingConfig signingConfigs.keystoreDebug
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.keystoreDebug
         }
