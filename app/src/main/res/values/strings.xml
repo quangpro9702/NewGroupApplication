@@ -29,4 +29,13 @@
     <string name="privacy_policy_link" translatable="false">https://sites.google.com/view/group-app-policy/home​</string>
     <string name="action_ok" translatable="false">Ok</string>
     <string name="action_view">Hiển thị</string>
+
+    <string name="privacy_policy_title" translatable="false">Notice of Privacy Policy</string>
+    <string name="privacy_policy_content" translatable="false">Thank you for trust and using our products and services. In compliance with the lastest legal requirements, we have made updates to out Privacy Policy
+     and we process your Personal Information based on the specific function you use of our services. The Personal Information we collect may include your Installed Application on your device.
+    The purpose of out is to improve user experiences and to provide services to you. The legal basic we process your personal data is your consents or the applicable law. When we process your Personal Data, the entity contacts with you or replies to your request is the controller. Please red the Privacy Policy carefully so  as to understand the principles we process your Personal Infomation.</string>
+    <string name="privacy_policy_content_accept" translatable="false">If you accept the Privacy Policy, please click Agree to use our products and services. We will strive to safeguard your Personal Information in accordance with applicable law.</string>
+    <string name="cancel" translatable="false">Cancel</string>
+    <string name="agree" translatable="false">Agree</string>
+
 </resources>

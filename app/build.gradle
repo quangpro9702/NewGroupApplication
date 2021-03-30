@@ -14,6 +14,10 @@ android {
         enabled = true
     }
 
+    viewBinding {
+        enabled = true
+    }
+
     defaultConfig {
         applicationId "todo.quang.appgroupppppp"
         minSdkVersion 16
