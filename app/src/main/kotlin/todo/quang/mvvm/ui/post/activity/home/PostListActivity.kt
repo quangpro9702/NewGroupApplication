@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
@@ -53,7 +52,7 @@ class PostListActivity : FragmentActivity() {
                 .commitAllowingStateLoss()
         // Obtain the FirebaseAnalytics instance.
         sharedPreferences = this.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
-        showPermission(getString(R.string.request_permission_get_genre))
+//        showPermission(getString(R.string.request_permission_get_genre))
         observeData()
         setOnClickListener()
 
@@ -109,35 +108,27 @@ class PostListActivity : FragmentActivity() {
 
     private fun setOnClickListener() {
         binding.btnSearch.setOnClickListener {
-            if (sharedPreferences.getBoolean(PERMISSION_ACCEPT_INSTALL_APP, false)) {
-                if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
-                    val intent = Intent(this, SearchListActivity::class.java)
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
-                }
+            if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
+                val intent = Intent(this, SearchListActivity::class.java)
+                startActivity(intent)
             } else {
-                showPermission(getString(R.string.request_permission_failure_notify_reaction))
+                Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
             }
         }
 
         bottomAppBar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.reload -> {
-                    if (sharedPreferences.getBoolean(PERMISSION_ACCEPT_INSTALL_APP, false)) {
-                        if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
-                            showAlertDeleteDialog(getString(R.string.notify_reload)) {
-                                viewModel.reloadData()
-                            }
-                        } else {
-                            Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
+                    if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
+                        showAlertDeleteDialog(getString(R.string.notify_reload)) {
+                            viewModel.reloadData()
                         }
                     } else {
-                        showPermission(getString(R.string.privacy_policy_link))
+                        Toast.makeText(this, getString(R.string.click_failure_message), Toast.LENGTH_SHORT).show()
                     }
                     true
                 }
-                R.id.info -> {
+             /*   R.id.info -> {
                     MaterialAlertDialogBuilder(this)
                             .setTitle(resources.getString(R.string.app_title_permission))
                             .setMessage("${getString(R.string.privacy_policy)} \n ${getString(R.string.privacy_policy_link)}")
@@ -155,7 +146,7 @@ class PostListActivity : FragmentActivity() {
                                 this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
                             }
                     true
-                }
+                }*/
                 else -> {
                     false
                 }

@@ -20,15 +20,23 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.post.activity.home.PostListActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".ui.post.activity.search.SearchListActivity"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name=".ui.post.activity.privacy.PrivacyPolicyActivity"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name=".ui.post.activity.splash.SplashScreenActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.post.activity.search.SearchListActivity"
-            android:launchMode="singleTask" />
     </application>
 </manifest>

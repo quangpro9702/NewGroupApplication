@@ -7,10 +7,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,18 +46,16 @@ class PostListViewModel @ViewModelInject constructor(
 
     val requestPermissionInstallApps: LiveData<Boolean> = MutableLiveData()
 
-    private val _doneGetData: LiveData<Boolean> = requestPermissionInstallApps.switchMapLiveData {
-        if (it) {
-            loadingProgressBar.postValue(RetrieveDataState.Start)
-            if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
-                if (context.isNetworkAvailable()) {
-                    loadPosts()
-                } else {
-                    loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
-                }
+    private val _doneGetData: LiveData<Boolean> = liveData {
+        loadingProgressBar.postValue(RetrieveDataState.Start)
+        if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
+            if (context.isNetworkAvailable()) {
+                loadPosts()
             } else {
-                emit(true)
+                loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
             }
+        } else {
+            emit(true)
         }
     }
 

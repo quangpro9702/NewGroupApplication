@@ -30,6 +30,7 @@
         android:id="@+id/tv_link"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:paddingTop="@dimen/_6sdp"
         android:paddingBottom="@dimen/_6sdp"
         android:text="@string/privacy_policy"
@@ -48,6 +49,7 @@
         android:id="@+id/tv_link_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
         android:paddingTop="@dimen/_6sdp"
         android:paddingBottom="@dimen/_6sdp"
         android:text="@string/privacy_policy"
@@ -62,6 +64,7 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <TextView
+        android:id="@+id/btn_cancel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_16sdp"
@@ -76,6 +79,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
+        android:id="@+id/btn_agree"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_16sdp"
@@ -89,4 +93,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/guild_line" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
