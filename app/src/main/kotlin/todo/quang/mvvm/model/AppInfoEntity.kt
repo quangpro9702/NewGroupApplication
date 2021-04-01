@@ -13,8 +13,8 @@ import androidx.room.PrimaryKey
  * @property body the content of the post
  */
 
-@Entity
 @Keep
+@Entity
 data class AppInfoEntity(
         @PrimaryKey
         var id: String,

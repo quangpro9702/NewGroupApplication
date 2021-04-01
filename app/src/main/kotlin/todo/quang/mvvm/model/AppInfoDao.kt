@@ -1,11 +1,13 @@
 package todo.quang.mvvm.model
 
+import androidx.annotation.Keep
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+@Keep
 @Dao
 interface AppInfoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -18,5 +20,5 @@ interface AppInfoDao {
     fun findAppByPackageNameDataa(packageName: String): Flow<AppInfoEntity?>
 
     @Query("SELECT * FROM AppInfoEntity where genreName=:groupName")
-    fun findListAppByGroupName(groupName : String) : List<AppInfoEntity>
+    fun findListAppByGroupName(groupName: String): List<AppInfoEntity>
 }

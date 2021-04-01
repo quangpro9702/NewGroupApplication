@@ -36,6 +36,8 @@ class SplashScreenActivity : AppCompatActivity() {
             mBinding.layoutPolicy.root.gone()
             mBinding.imgApp.visible()
             Handler().postDelayed({
+                val intent = Intent(this, PostListActivity::class.java)
+                startActivity(intent)
                 finish()
             }, 1500)
         }

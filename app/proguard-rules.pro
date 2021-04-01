@@ -110,5 +110,9 @@ public void *(android.view.View);
   *** rewind();
 }
 
+#Room
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
+
 # for DexGuard only
 #-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
