@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import todo.quang.mvvm.databinding.ActivityPrivacyPolicyBinding
 
 class PrivacyPolicyActivity : AppCompatActivity() {
-    private lateinit var mBinding: ActivityPrivacyPolicyBinding
+    lateinit var mBinding: ActivityPrivacyPolicyBinding
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
