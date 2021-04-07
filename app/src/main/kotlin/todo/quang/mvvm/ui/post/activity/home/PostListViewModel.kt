@@ -8,10 +8,7 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import todo.quang.mvvm.R
 import todo.quang.mvvm.base.state.RetrieveDataState
 import todo.quang.mvvm.base.switchMapLiveData
@@ -46,7 +43,7 @@ class PostListViewModel @ViewModelInject constructor(
 
     val requestPermissionInstallApps: LiveData<Boolean> = MutableLiveData()
 
-    private val _doneGetData: LiveData<Boolean> = liveData {
+    private val _doneGetData: LiveData<Boolean> = liveData(Dispatchers.IO) {
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (!sharedPreferences.getBoolean(FIRST_LOGIN, false)) {
             if (context.isNetworkAvailable()) {
@@ -55,12 +52,14 @@ class PostListViewModel @ViewModelInject constructor(
                 loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
             }
         } else {
+            Log.d("loadpost", "emit true: ")
             emit(true)
         }
     }
 
     private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = _doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
+        Log.d("loadpost", "mapPackageInfoFromDataBase ")
         getInstalledApps().forEach { packageInfo ->
             appInfoDao.findAppByPackageNameData(packageInfo.packageName)?.apply {
                 list.add(AppInfoDataItem(this, packageInfo))
@@ -157,33 +156,35 @@ class PostListViewModel @ViewModelInject constructor(
 
     private suspend fun loadPosts() {
         val list: ArrayList<AppInfoEntity> = arrayListOf()
-        getInstalledApps().chunked(20).forEach {
-            withContext(Dispatchers.IO) {
-                it.forEach {
-                    kotlin.runCatching {
-                        postApi.getGenre(it.packageName, locale)
-                    }.getOrNull()?.let { response ->
-                        response.body()?.let { response ->
-                            response.data.takeIf { data ->
-                                data.size > 1
-                            }?.let { data ->
-                                list.add(AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                        genreType = response.genre, genreName = data[1]))
+        runBlocking {
+            getInstalledApps().chunked(20).forEach {
+                launch {
+                    it.forEach {
+                        kotlin.runCatching {
+                            postApi.getGenre(it.packageName, locale)
+                        }.getOrNull()?.let { response ->
+                            response.body()?.let { response ->
+                                response.data.takeIf { data ->
+                                    data.size > 1
+                                }?.let { data ->
+                                    list.add(AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                            genreType = response.genre, genreName = data[1]))
+                                }
                             }
+                        } ?: apply {
+                            val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                    genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
+                            list.add(appInsert)
                         }
-                    } ?: apply {
-                        val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
-                        list.add(appInsert)
+                        loadingTextShow.postValue(it.applicationInfo.loadLabel(context.packageManager).toString())
                     }
-                    loadingTextShow.postValue(it.applicationInfo.loadLabel(context.packageManager).toString())
                 }
             }
-        }.apply {
-            appInfoDao.insertAll(*list.toTypedArray())
-            sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
-            _doneGetData.postValue(true)
         }
+        appInfoDao.insertAll(*list.toTypedArray())
+        sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
+        _doneGetData.postValue(true)
+        Log.d("loadpost", "load data ")
     }
 
     fun reloadData() = viewModelScope.launch(Dispatchers.IO + handler) {

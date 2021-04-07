@@ -60,6 +60,7 @@ class SplashScreenActivity : AppCompatActivity() {
             sharedPreferences.edit().putBoolean(ACCEPT_POLICY, true).apply()
             val intent = Intent(this, PostListActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 }

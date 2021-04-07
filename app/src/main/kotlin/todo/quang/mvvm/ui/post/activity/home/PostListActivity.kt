@@ -50,9 +50,7 @@ class PostListActivity : FragmentActivity() {
                 .add(R.id.nav_host_fragment, HomeCategoryFragment.newInstance())
                 .addToBackStack("")
                 .commitAllowingStateLoss()
-        // Obtain the FirebaseAnalytics instance.
         sharedPreferences = this.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
-//        showPermission(getString(R.string.request_permission_get_genre))
         observeData()
         setOnClickListener()
 
@@ -81,31 +79,6 @@ class PostListActivity : FragmentActivity() {
                 }
     }
 
-    private fun showAlertRequestPermissionDialog(message: String, blockPositive: () -> Unit) {
-        MaterialAlertDialogBuilder(this)
-                .setTitle(resources.getString(R.string.app_title_permission))
-                .setMessage(Html.fromHtml(message))
-                .setNegativeButton(resources.getString(R.string.cancel_action)) { _, _ ->
-                }
-                .setPositiveButton(resources.getString(R.string.accept_action)) { _, _ ->
-                    blockPositive.invoke()
-                }
-                .show().apply {
-                    this.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#5b5b5b"))
-                    this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
-                    this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
-                }
-    }
-
-    private fun showPermission(message: String) {
-        if (!sharedPreferences.getBoolean(PERMISSION_ACCEPT_INSTALL_APP, false)) {
-            showAlertRequestPermissionDialog(message, blockPositive = {
-                viewModel.requestPermissionInstallApps.postValue(true)
-                sharedPreferences.edit().putBoolean(PERMISSION_ACCEPT_INSTALL_APP, true).apply()
-            })
-        }
-    }
-
     private fun setOnClickListener() {
         binding.btnSearch.setOnClickListener {
             if (viewModel.loadingProgressBar.value != RetrieveDataState.Start) {
@@ -128,25 +101,6 @@ class PostListActivity : FragmentActivity() {
                     }
                     true
                 }
-             /*   R.id.info -> {
-                    MaterialAlertDialogBuilder(this)
-                            .setTitle(resources.getString(R.string.app_title_permission))
-                            .setMessage("${getString(R.string.privacy_policy)} \n ${getString(R.string.privacy_policy_link)}")
-                            .setNegativeButton(resources.getString(R.string.cancel_action)) { _, _ ->
-                            }
-                            .setPositiveButton(resources.getString(R.string.action_view)) { _, _ ->
-                                val url = "https://sites.google.com/view/group-app-policy/home"
-                                val i = Intent(Intent.ACTION_VIEW)
-                                i.data = Uri.parse(url)
-                                startActivity(i)
-                            }
-                            .show().apply {
-                                this.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#5b5b5b"))
-                                this.getButton(DialogInterface.BUTTON_POSITIVE).isAllCaps = false
-                                this.getButton(DialogInterface.BUTTON_NEGATIVE).isAllCaps = false
-                            }
-                    true
-                }*/
                 else -> {
                     false
                 }
