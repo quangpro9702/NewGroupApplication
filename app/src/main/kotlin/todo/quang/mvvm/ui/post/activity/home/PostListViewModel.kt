@@ -52,14 +52,12 @@ class PostListViewModel @ViewModelInject constructor(
                 loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
             }
         } else {
-            Log.d("loadpost", "emit true: ")
             emit(true)
         }
     }
 
     private val mapPackageInfoFromDataBase: LiveData<List<AppInfoDataItem>> = _doneGetData.switchMapLiveData(Dispatchers.IO + handler) {
         val list: ArrayList<AppInfoDataItem> = arrayListOf()
-        Log.d("loadpost", "mapPackageInfoFromDataBase ")
         getInstalledApps().forEach { packageInfo ->
             appInfoDao.findAppByPackageNameData(packageInfo.packageName)?.apply {
                 list.add(AppInfoDataItem(this, packageInfo))
@@ -154,37 +152,32 @@ class PostListViewModel @ViewModelInject constructor(
         }
     }
 
-    private suspend fun loadPosts() {
-        val list: ArrayList<AppInfoEntity> = arrayListOf()
-        runBlocking {
-            getInstalledApps().chunked(20).forEach {
-                launch {
-                    it.forEach {
-                        kotlin.runCatching {
-                            postApi.getGenre(it.packageName, locale)
-                        }.getOrNull()?.let { response ->
-                            response.body()?.let { response ->
-                                response.data.takeIf { data ->
-                                    data.size > 1
-                                }?.let { data ->
-                                    list.add(AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                            genreType = response.genre, genreName = data[1]))
-                                }
-                            }
-                        } ?: apply {
-                            val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                    genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
-                            list.add(appInsert)
+    private suspend fun loadPosts() = coroutineScope {
+        val list: List<AppInfoEntity> = getInstalledApps().map {
+            async {
+                val data: AppInfoEntity = kotlin.runCatching {
+                    postApi.getGenre(it.packageName, locale)
+                }.getOrNull()?.let { response ->
+                    response.body()?.let { response ->
+                        response.data.takeIf { data ->
+                            data.size > 1
+                        }?.let { data ->
+                            AppInfoEntity(id = it.packageName, packageName = it.packageName, genreType = response.genre, genreName = data[1])
                         }
-                        loadingTextShow.postValue(it.applicationInfo.loadLabel(context.packageManager).toString())
                     }
-                }
+                } ?: AppInfoEntity(id = it.packageName, packageName = it.packageName, genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
+
+                loadingTextShow.postValue(it.applicationInfo.loadLabel(context.packageManager).toString())
+                data
             }
-        }
+        }.awaitAll()
+
         appInfoDao.insertAll(*list.toTypedArray())
+
         sharedPreferences.edit().putBoolean(FIRST_LOGIN, true).apply()
+
         _doneGetData.postValue(true)
-        Log.d("loadpost", "load data ")
+
     }
 
     fun reloadData() = viewModelScope.launch(Dispatchers.IO + handler) {
@@ -192,31 +185,29 @@ class PostListViewModel @ViewModelInject constructor(
         loadingProgressBar.postValue(RetrieveDataState.Start)
         if (context.isNetworkAvailable()) {
             val listApp = appInfoDao.findListAppByGroupName(PACKAGE_OTHER)
-            listApp.chunked(20).forEach {
-                withContext(coroutineContext) {
-                    it.forEach {
-                        kotlin.runCatching {
-                            postApi.getGenre(it.packageName, locale)
-                        }.getOrNull()?.let { response ->
-                            response.body()?.let { response ->
-                                response.data.takeIf { data ->
-                                    data.size > 1
-                                }?.let { data ->
-                                    list.add(AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                            genreType = response.genre, genreName = data[1]))
-                                }
+            listApp.map {
+                async {
+                    kotlin.runCatching {
+                        postApi.getGenre(it.packageName, locale)
+                    }.getOrNull()?.let { response ->
+                        response.body()?.let { response ->
+                            response.data.takeIf { data ->
+                                data.size > 1
+                            }?.let { data ->
+                                list.add(AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                        genreType = response.genre, genreName = data[1]))
                             }
-                        } ?: apply {
-                            val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
-                                    genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
-                            list.add(appInsert)
                         }
+                    } ?: apply {
+                        val appInsert = AppInfoEntity(id = it.packageName, packageName = it.packageName,
+                                genreType = APP_CONFIG, genreName = PACKAGE_OTHER)
+                        list.add(appInsert)
                     }
                 }
-            }.apply {
-                appInfoDao.insertAll(*list.toTypedArray())
-                _doneGetData.postValue(true)
-            }
+            }.awaitAll()
+            appInfoDao.insertAll(*list.toTypedArray())
+
+            _doneGetData.postValue(true)
         } else {
             loadingProgressBar.postValue(RetrieveDataState.Failure(Throwable(context.getString(R.string.required_network))))
         }
