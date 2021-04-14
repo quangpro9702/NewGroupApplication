@@ -55,12 +55,14 @@ android {
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.keystoreDebug
+            manifestPlaceholders = [crashlyticsCollectionEnabled: "false"]
         }
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.keystoreDebug
+            manifestPlaceholders = [crashlyticsCollectionEnabled: "true"]
         }
     }
     sourceSets {
